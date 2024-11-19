@@ -23,7 +23,7 @@ def save_geojson_with_bytesio(dataframe):
 
 
 st.set_page_config(layout="wide")
-path_cache = "~/Downloads/infra_cyclables.json"
+path_cache = "infra_cyclables.geojson"
 
 
 st.write("Dessiner une zone :")
