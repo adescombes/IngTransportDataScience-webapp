@@ -18,66 +18,63 @@ def organise_df_with_SQLqueries(osmid_bike_type, df):
     Output: df with two new columns with the information on the type of bike infrastructure and also a new dataframe (line_gpd_bike) with only the segement where you can bike
     """
     df["info"] = "0"
-    df.loc[osmid_bike_type[0], "info"] = "Accotements_cyclables-1xD"
-    df.loc[osmid_bike_type[1], "info"] = "Accotements_cyclables-1xG"
-    df.loc[osmid_bike_type[2], "info"] = "Accotements_cyclables-2x"
-    df.loc[osmid_bike_type[3], "info"] = "Autres_chemins_piéton_autorisé_aux_vélos-1x"
-    df.loc[osmid_bike_type[4], "info"] = "Autres_chemins_piéton_autorisé_aux_vélos-2x"
-    df.loc[osmid_bike_type[5], "info"] = "Bandes_cyclables-1xD"
-    df.loc[osmid_bike_type[6], "info"] = "Bandes_cyclables-1xG"
-    df.loc[osmid_bike_type[7], "info"] = "Bandes_cyclables-2x"
-    df.loc[osmid_bike_type[8], "info"] = "Bandes_cyclables-2xD"
-    df.loc[osmid_bike_type[9], "info"] = "Bandes_cyclables-2xG"
-    df.loc[osmid_bike_type[10], "info"] = "Bandes_cyclables-1xD"
-    df.loc[osmid_bike_type[11], "info"] = "Bandes_cyclables-1xG"
-    df.loc[osmid_bike_type[12], "info"] = "Bandes_cyclables-2x"
-    df.loc[osmid_bike_type[13], "info"] = "Doubles-sens_cyclables_sans_bande"
-    df.loc[osmid_bike_type[14], "info"] = "Doubles-sens_cyclables_en_bande-D"
-    df.loc[osmid_bike_type[15], "info"] = "Doubles-sens_cyclables_en_bande-G"
-    df.loc[osmid_bike_type[16], "info"] = "Doubles-sens_cyclables_piste-D"
-    df.loc[osmid_bike_type[17], "info"] = "Doubles-sens_cyclables_piste-G"
-    df.loc[osmid_bike_type[18], "info"] = "Chemin_piéton_autorisé_aux_vélos-1x"
-    df.loc[osmid_bike_type[19], "info"] = "Chemin_piéton_autorisé_aux_vélos-2x "
-    df.loc[osmid_bike_type[20], "info"] = "Limite_a_30-1x"
-    df.loc[osmid_bike_type[21], "info"] = "Limite_a_30-2x"
-    df.loc[osmid_bike_type[22], "info"] = "Pedestrian_1x"
-    df.loc[osmid_bike_type[23], "info"] = "Pedestrian_2x."
-    df.loc[osmid_bike_type[24], "info"] = "Pistes_cyclables-1xD."
-    df.loc[osmid_bike_type[25], "info"] = "Pistes_cyclables-1xG"
-    df.loc[osmid_bike_type[26], "info"] = "Pistes_cyclables-2x"
-    df.loc[osmid_bike_type[27], "info"] = "Pistes_cyclables-2xD"
-    df.loc[osmid_bike_type[28], "info"] = "Pistes_cyclables-2xG"
-    df.loc[osmid_bike_type[29], "info"] = "Pistes_sur_Trottoirs-1x"
-    df.loc[osmid_bike_type[30], "info"] = "Pistes_sur_Trottoirs-1xD"
-    df.loc[osmid_bike_type[31], "info"] = "Pistes_sur_Trottoirs-1xG"
-    df.loc[osmid_bike_type[32], "info"] = "Pistes_sur_Trottoirs-2x"
-    df.loc[osmid_bike_type[33], "info"] = "Routes_services_chemins_agricoles-1x"
-    df.loc[osmid_bike_type[34], "info"] = "Routes_services_chemins_agricoles-2x"
-    df.loc[osmid_bike_type[35], "info"] = "Trottoirs_cyclables-1x"
-    df.loc[osmid_bike_type[36], "info"] = "Trottoirs_cyclables-1xD"
-    df.loc[osmid_bike_type[37], "info"] = "Trottoirs_cyclables-1xG"
-    df.loc[osmid_bike_type[38], "info"] = "Trottoirs_cyclables-2x"
-    df.loc[osmid_bike_type[39], "info"] = "Voies_bus-1xD"
-    df.loc[osmid_bike_type[40], "info"] = "Voies_bus-1xG"
-    df.loc[osmid_bike_type[41], "info"] = "Voies_bus-2x"
-    df.loc[osmid_bike_type[42], "info"] = "Voies_vertes-1x"
-    df.loc[osmid_bike_type[43], "info"] = "Voies_vertes-2x"
-    df.loc[osmid_bike_type[44], "info"] = "Zones_30-1x"
-    df.loc[osmid_bike_type[45], "info"] = "Zones_30-2x"
-    df.loc[osmid_bike_type[46], "info"] = "Zones_rencontre-1x"
-    df.loc[osmid_bike_type[47], "info"] = "Zones_rencontre-2x"
-    df.loc[osmid_bike_type[48], "info"] = "Pistes_cyclables"  # anciennement chaudidou
-    df.loc[osmid_bike_type[49], "info"] = "escalier-1xD"
-    df.loc[osmid_bike_type[50], "info"] = "escalier-1xG"
-    df.loc[osmid_bike_type[51], "info"] = "escalier-2x"
-    df.loc[osmid_bike_type[52], "info"] = "Chemin_piéton_autorisé_aux_vélos-1x"
-    df.loc[osmid_bike_type[53], "info"] = "Chemin_piéton_autorisé_aux_vélos-2x"
-    df.loc[osmid_bike_type[54], "info"] = "velorue-1x"
-    df.loc[osmid_bike_type[55], "info"] = "velorue-2x"
-    df.loc[osmid_bike_type[58], "info"] = "Limite_a_20-1x"
-    df.loc[osmid_bike_type[59], "info"] = "Limite_a_20-2x"
-    df.loc[osmid_bike_type[60], "info"] = "Limite_a_50-1x"
-    df.loc[osmid_bike_type[61], "info"] = "Limite_a_50-2x"
+    df.loc[osmid_bike_type[0], "info"] = "Accotement cyclable"  #  à droite
+    df.loc[osmid_bike_type[1], "info"] = "Accotement cyclable"  # à gauche
+    df.loc[osmid_bike_type[2], "info"] = "Accotement cyclable"
+    df.loc[osmid_bike_type[3], "info"] = "Chemin piéton autorisé aux vélos"
+    df.loc[osmid_bike_type[4], "info"] = "Chemin piéton autorisé aux vélos"
+    df.loc[osmid_bike_type[5], "info"] = "Bande cyclable"  #  à droite
+    df.loc[osmid_bike_type[6], "info"] = "Bande cyclable"  # à gauche
+    df.loc[osmid_bike_type[7], "info"] = "Bande cyclable"
+    df.loc[osmid_bike_type[8], "info"] = "Bande cyclable"  #  à droite
+    df.loc[osmid_bike_type[9], "info"] = "Bande cyclable"  #  à gauche
+    df.loc[osmid_bike_type[10], "info"] = "Chaussée partagée"
+    df.loc[osmid_bike_type[11], "info"] = "Chaussée partagée"
+    df.loc[osmid_bike_type[12], "info"] = "Chaussée partagée"
+    df.loc[osmid_bike_type[13], "info"] = "Double-sens cyclable"  #  (sans marquage)
+    df.loc[osmid_bike_type[14], "info"] = "Double-sens cyclable"  #  (avec marquage)
+    df.loc[osmid_bike_type[15], "info"] = (
+        "Double-sens cyclable"  #  (avec marquage à gauche)
+    )
+    df.loc[osmid_bike_type[16], "info"] = (
+        "Double-sens cyclable"  #  (avec marquage à droite)
+    )
+    df.loc[osmid_bike_type[17], "info"] = (
+        "Double-sens cyclable"  #  (avec marquage à gauche)
+    )
+    df.loc[osmid_bike_type[18], "info"] = "Chemin piéton autorisé aux vélos"
+    df.loc[osmid_bike_type[19], "info"] = "Chemin piéton autorisé aux vélos"
+    df.loc[osmid_bike_type[20], "info"] = "Limite à 30"
+    df.loc[osmid_bike_type[21], "info"] = "Chemin piéton autorisé aux vélos"
+    df.loc[osmid_bike_type[22], "info"] = "Piste cyclable"  #  à droite
+    df.loc[osmid_bike_type[23], "info"] = "Piste cyclable"  #  à gauche
+    df.loc[osmid_bike_type[24], "info"] = "Piste cyclable"
+    df.loc[osmid_bike_type[25], "info"] = "Piste cyclable"
+    df.loc[osmid_bike_type[26], "info"] = "Piste cyclable"
+    df.loc[osmid_bike_type[27], "info"] = "Piste cyclable sur trottoir"
+    df.loc[osmid_bike_type[28], "info"] = "Piste cyclable sur trottoir"
+    df.loc[osmid_bike_type[29], "info"] = "Piste cyclable sur trottoir"
+    df.loc[osmid_bike_type[30], "info"] = "Piste cyclable sur trottoir"
+    df.loc[osmid_bike_type[30], "info"] = "Piste cyclable sur trottoir"
+    df.loc[osmid_bike_type[31], "info"] = "Chemin de terre"
+    df.loc[osmid_bike_type[32], "info"] = "Chemin de terre"
+    df.loc[osmid_bike_type[33], "info"] = "Trottoir cyclable"
+    df.loc[osmid_bike_type[34], "info"] = "Trottoir cyclable"  #  à droite
+    df.loc[osmid_bike_type[35], "info"] = "Trottoir cyclable"  # à gauche
+    df.loc[osmid_bike_type[36], "info"] = "Trottoir cyclable"
+    df.loc[osmid_bike_type[37], "info"] = "Voie bus autorisée aux vélos"
+    df.loc[osmid_bike_type[38], "info"] = "Voie bus autorisée aux vélos"
+    df.loc[osmid_bike_type[39], "info"] = "Voie bus autorisée aux vélos"
+    df.loc[osmid_bike_type[40], "info"] = "Voie verte"
+    df.loc[osmid_bike_type[41], "info"] = "Zone 30"
+    df.loc[osmid_bike_type[42], "info"] = "Zone de rencontre"
+    df.loc[osmid_bike_type[43], "info"] = "Chaucidou"
+    df.loc[osmid_bike_type[44], "info"] = "Escalier avec rampe pour vélos"
+    df.loc[osmid_bike_type[45], "info"] = "Chemin piéton autorisé aux vélos"
+    df.loc[osmid_bike_type[46], "info"] = "Chemin piéton autorisé aux vélos"
+    df.loc[osmid_bike_type[47], "info"] = "Vélorue"
+    df.loc[osmid_bike_type[48], "info"] = "Limite à 20 km/h"
+    df.loc[osmid_bike_type[49], "info"] = "Limite à 50 km/h"
 
     # add bike = yes
     other_bike_permissive = df[
@@ -91,97 +88,9 @@ def organise_df_with_SQLqueries(osmid_bike_type, df):
             | (df.bicycle == "designated")
         )
     ].index
-    df.loc[other_bike_permissive, "info"] = "other_bike_permissive"
+    df.loc[other_bike_permissive, "info"] = "Autre route autorisée aux vélos"
 
-    # More grouped
-    df.loc[osmid_bike_type[0], "info_regrouped"] = "Accotements_cyclables"
-    df.loc[osmid_bike_type[1], "info_regrouped"] = "Accotements_cyclables"
-    df.loc[osmid_bike_type[2], "info_regrouped"] = "Accotements_cyclables"
-    df.loc[osmid_bike_type[3], "info_regrouped"] = "Chemin_piéton_autorisé_aux_vélos"
-    df.loc[osmid_bike_type[4], "info_regrouped"] = "Chemin_piéton_autorisé_aux_vélos"
-    df.loc[osmid_bike_type[5], "info_regrouped"] = "Bandes_cyclables"
-    df.loc[osmid_bike_type[6], "info_regrouped"] = "Bandes_cyclables"
-    df.loc[osmid_bike_type[7], "info_regrouped"] = "Bandes_cyclables"
-    df.loc[osmid_bike_type[8], "info_regrouped"] = "Bandes_cyclables"
-    df.loc[osmid_bike_type[9], "info_regrouped"] = "Bandes_cyclables"
-    df.loc[osmid_bike_type[10], "info_regrouped"] = "Bandes_cyclables"
-    df.loc[osmid_bike_type[11], "info_regrouped"] = "Bandes_cyclables"
-    df.loc[osmid_bike_type[13], "info_regrouped"] = "Double-sens_cyclables"
-    df.loc[osmid_bike_type[14], "info_regrouped"] = "Double-sens_cyclables"
-    df.loc[osmid_bike_type[15], "info_regrouped"] = "Double-sens_cyclables"
-    df.loc[osmid_bike_type[16], "info_regrouped"] = "Double-sens_cyclables"
-    df.loc[osmid_bike_type[17], "info_regrouped"] = "Double-sens_cyclables"
-    df.loc[osmid_bike_type[18], "info_regrouped"] = "Chemin_piéton_autorisé_aux_vélos"
-    df.loc[osmid_bike_type[19], "info_regrouped"] = "Chemin_piéton_autorisé_aux_vélos"
-    df.loc[osmid_bike_type[20], "info_regrouped"] = "Limite_a_30"
-    df.loc[osmid_bike_type[21], "info_regrouped"] = "Limite_a_30"
-    df.loc[osmid_bike_type[22], "info_regrouped"] = "Chemin_piéton_autorisé_aux_vélos"
-    df.loc[osmid_bike_type[23], "info_regrouped"] = "Chemin_piéton_autorisé_aux_vélos"
-    df.loc[osmid_bike_type[24], "info_regrouped"] = "Pistes_cyclables"
-    df.loc[osmid_bike_type[25], "info_regrouped"] = "Pistes_cyclables"
-    df.loc[osmid_bike_type[26], "info_regrouped"] = "Pistes_cyclables"
-    df.loc[osmid_bike_type[27], "info_regrouped"] = "Pistes_cyclables"
-    df.loc[osmid_bike_type[28], "info_regrouped"] = "Pistes_cyclables"
-    df.loc[osmid_bike_type[29], "info_regrouped"] = "Pistes_sur_Trottoirs"
-    df.loc[osmid_bike_type[30], "info_regrouped"] = "Pistes_sur_Trottoirs"
-    df.loc[osmid_bike_type[31], "info_regrouped"] = "Pistes_sur_Trottoirs"
-    df.loc[osmid_bike_type[32], "info_regrouped"] = "Pistes_sur_Trottoirs"
-    df.loc[osmid_bike_type[33], "info_regrouped"] = "Routes_services_chemins_agricoles"
-    df.loc[osmid_bike_type[34], "info_regrouped"] = "Routes_services_chemins_agricoles"
-    df.loc[osmid_bike_type[35], "info_regrouped"] = "Trottoirs_cyclables"
-    df.loc[osmid_bike_type[36], "info_regrouped"] = "Trottoirs_cyclables"
-    df.loc[osmid_bike_type[37], "info_regrouped"] = "Trottoirs_cyclables"
-    df.loc[osmid_bike_type[38], "info_regrouped"] = "Trottoirs_cyclables"
-    df.loc[osmid_bike_type[39], "info_regrouped"] = "Voies_bus"
-    df.loc[osmid_bike_type[40], "info_regrouped"] = "Voies_bus"
-    df.loc[osmid_bike_type[41], "info_regrouped"] = "Voies_bus"
-    df.loc[osmid_bike_type[42], "info_regrouped"] = "Voies_vertes"
-    df.loc[osmid_bike_type[43], "info_regrouped"] = "Voies_vertes"
-    df.loc[osmid_bike_type[44], "info_regrouped"] = "Zones_30"
-    df.loc[osmid_bike_type[45], "info_regrouped"] = "Zones_30"
-    df.loc[osmid_bike_type[46], "info_regrouped"] = "Zones_rencontre"
-    df.loc[osmid_bike_type[47], "info_regrouped"] = "Zones_rencontre"
-    df.loc[osmid_bike_type[48], "info_regrouped"] = (
-        "Pistes_cyclables"  # anciennement chaucidou
-    )
-    df.loc[osmid_bike_type[49], "info_regrouped"] = "escalier"
-    df.loc[osmid_bike_type[50], "info_regrouped"] = "escalier"
-    df.loc[osmid_bike_type[51], "info_regrouped"] = "escalier"
-    df.loc[osmid_bike_type[52], "info_regrouped"] = "Chemin_piéton_autorisé_aux_vélos"
-    df.loc[osmid_bike_type[53], "info_regrouped"] = "Chemin_piéton_autorisé_aux_vélos"
-    df.loc[osmid_bike_type[54], "info_regrouped"] = "velorue"
-    df.loc[osmid_bike_type[55], "info_regrouped"] = "velorue"
-    df.loc[osmid_bike_type[58], "info_regrouped"] = "Limite_a_20"
-    df.loc[osmid_bike_type[59], "info_regrouped"] = "Limite_a_20"
-    df.loc[osmid_bike_type[60], "info_regrouped"] = "Limite_a_50"
-    df.loc[osmid_bike_type[61], "info_regrouped"] = "Limite_a_50"
-
-    # add bike = yes
-    df.loc[other_bike_permissive, "info_regrouped"] = "other_bike_permissive"
-
-    # traitement des directions et sens uniques
-    df.loc[:, "bike_way"] = df["info"].apply(lambda x: define_way_bike(x))
-    df.loc[:, "length_line_onewaycounted_bike"] = df["bike_way"] * df["length_line"]
-    df["length_line_onewaycounted_wholenetwork"] = df["length_line"]
-    df.loc[osmid_bike_type[56], "length_line_onewaycounted_wholenetwork"] = (
-        df.loc[osmid_bike_type[56], "length_line_onewaycounted_wholenetwork"] * 2
-    )
-    df.loc[osmid_bike_type[57], "length_line_onewaycounted_wholenetwork"] = (
-        df.loc[osmid_bike_type[57], "length_line_onewaycounted_wholenetwork"] * 1
-    )
-
-    return df[
-        [
-            "geometry",
-            "length_line",
-            "info",
-            "info_regrouped",
-            "highway",
-            "bike_way",
-            "length_line_onewaycounted_wholenetwork",
-            "length_line_onewaycounted_bike",
-        ]
-    ]
+    return df[["geometry", "length_line", "info", "highway"]]
 
 
 def define_way_bike(x):
