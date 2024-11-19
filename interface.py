@@ -1,6 +1,7 @@
 import geopandas as gpd
 import numpy as np
 import io
+import os
 import osmnx as ox
 from pandasql import sqldf
 from shapely.geometry import Polygon
@@ -23,7 +24,7 @@ def save_geojson_with_bytesio(dataframe):
 
 
 st.set_page_config(layout="wide")
-path_cache = "infra_cyclables.geojson"
+path_cache = "/mount/src/ingtransportdatascience-webapp/infra_cyclables.geojson"
 
 
 st.write("Dessiner une zone :")
@@ -136,7 +137,7 @@ try:
     st.download_button(
         label="Download data",
         data=save_geojson_with_bytesio(gdf),
-        file_name="infra_cyclables.geojson",
+        file_name=path_cache,
         mime="application/geo+json",
     )
 
