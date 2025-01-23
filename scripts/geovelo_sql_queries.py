@@ -1,12 +1,7 @@
 ## All SQL queries from geovel
 
-# Attention syntaxe :
-# line_gpd_clipped.loc[osmid_bike_type[ N ] ...
-# q_N+1
-
-
 # line_gpd_clipped.loc[osmid_bike_type[0],"info"]="Accotements_cyclables-1xD"
-q0 = """
+q1="""
 -- Les accotements cyclables comptées une fois sont :
 (	-- Soit qui ne sont que d'un coté d'une route à double sens et sont à sens uniques
 	(	-- voies à double sens
@@ -58,7 +53,7 @@ OR
 )
 """
 # line_gpd_clipped.loc[osmid_bike_type[1],"info"]="Accotements_cyclables-1xG"
-q1 = """-- Les accotements cyclables comptées une fois sont :
+q2="""-- Les accotements cyclables comptées une fois sont :
 
 (	-- Soit qui ne sont que d'un coté d'une route à double sens et sont à sens uniques
 	(	-- voies à double sens
@@ -111,7 +106,7 @@ OR
 )
  """
 # line_gpd_clipped.loc[osmid_bike_type[2],"info"]="Accotements_cyclables-2x"
-q2 = """(	-- Soit
+q3="""(	-- Soit
 	(	-- une route à double sens
 		(
 			"oneway" IS NULL
@@ -140,7 +135,7 @@ q2 = """(	-- Soit
 
  """
 # line_gpd_clipped.loc[osmid_bike_type[3],"info"]="Autres_chemins_piéton_autorisé_aux_vélos-1x"
-q3 = """(
+q4="""(
 	"oneway" IN ('yes','-1')
 	OR
 	"oneway:bicycle" IN ('yes','-1')
@@ -183,7 +178,7 @@ AND
 )
 """
 # line_gpd_clipped.loc[osmid_bike_type[4],"info"]="Autres_chemins_piéton_autorisé_aux_vélos-2x"
-q4 = """(
+q5="""(
 	( "oneway" IS NULL OR "oneway" NOT IN ('yes','-1'))
 	AND
 	( "oneway:bicycle" IS NULL OR "oneway" NOT IN ('yes','-1'))
@@ -226,7 +221,7 @@ AND
 )
  """
 # line_gpd_clipped.loc[osmid_bike_type[5],"info"]="Bandes_cyclables-1xD"
-q5 = """-- Les bandes cyclables comptées une fois (et qui ne sont pas des doubles-sens cyclables) sont :
+q6="""-- Les bandes cyclables comptées une fois (et qui ne sont pas des doubles-sens cyclables) sont :
 
 (	-- Soit qui ne sont que d'un coté d'une route à double sens et sont à sens uniques
 	(	-- voies à double sens
@@ -301,7 +296,7 @@ OR
 )
  """
 # line_gpd_clipped.loc[osmid_bike_type[6],"info"]="Bandes_cyclables-1xG"
-q6 = """ -- Les bandes cyclables comptées une fois (et qui ne sont pas des doubles-sens cyclables) sont :
+q7=""" -- Les bandes cyclables comptées une fois (et qui ne sont pas des doubles-sens cyclables) sont :
 
 (	-- Soit qui ne sont que d'un coté d'une route à double sens et sont à sens uniques
 	(	-- voies à double sens
@@ -378,7 +373,7 @@ OR
 )
  """
 # line_gpd_clipped.loc[osmid_bike_type[7],"info"]="Bandes_cyclables-2x"
-q7 = """(	-- Soit
+q8="""(	-- Soit
 	(	-- une route à double sens
 		(
 			"oneway" IS NULL
@@ -403,11 +398,17 @@ q7 = """(	-- Soit
 		OR	-- soit une bande cyclable à droite et à gauche quelque soit le sens
 		"cycleway:both" IN ('lane','opposite_lane')
 	)
+	AND
+	( --et qui ne comporte pas une seul voie sinon c'est un chaucidou
+	    "lanes" IS NULL
+	    OR
+	    "lanes" NOT IN ('1')
+	)
 )
 
 """
 # line_gpd_clipped.loc[osmid_bike_type[8],"info"]="Bandes_cyclables-2xD"
-q8 = """ --Soit
+q9=""" --Soit
 	(	-- une route à sens unique ou non, quand la bande de droite est à double sens
 		"cycleway:right" IN ('lane','opposite_lane')
 		AND
@@ -415,15 +416,15 @@ q8 = """ --Soit
 	)
 """
 # line_gpd_clipped.loc[osmid_bike_type[9],"info"]="Bandes_cyclables-2xG"
-q9 = """--Soit
+q10="""--Soit
 	(	-- une route à sens unique ou non, quand la bande de gauche est à double sens
 		"cycleway:left" IN ('lane','opposite_lane')
 		AND
 		"cycleway:left:oneway" LIKE 'no'
 	)
 """
-# line_gpd_clipped.loc[osmid_bike_type[10],"info"]="Cheminements_cyclables-1xD" -> Chaussée partagée
-q10 = """ -- Les cheminements cyclables comptées une fois sont :
+# line_gpd_clipped.loc[osmid_bike_type[10],"info"]="Cheminements_cyclables-1xD"
+q11=""" -- Les cheminements cyclables comptées une fois sont :
 
 (	-- Soit qui ne sont que d'un coté d'une route à double sens et sont à sens uniques
 	(	-- voies à double sens
@@ -474,8 +475,8 @@ OR
 	)
 )
 """
-# line_gpd_clipped.loc[osmid_bike_type[11],"info"]="Cheminements_cyclables-1xG" -> Chaussée partagée
-q11 = """ -- Les cheminements cyclables comptées une fois sont :
+# line_gpd_clipped.loc[osmid_bike_type[11],"info"]="Cheminements_cyclables-1xG"
+q12=""" -- Les cheminements cyclables comptées une fois sont :
 
 (	-- Soit qui ne sont que d'un coté d'une route à double sens et sont à sens uniques
 	(	-- voies à double sens
@@ -532,8 +533,8 @@ OR
 	)
 )
 """
-# line_gpd_clipped.loc[osmid_bike_type[12],"info"]="Cheminements_cyclables-2x" -> Chaussée partagée
-q12 = """(	-- Soit
+# line_gpd_clipped.loc[osmid_bike_type[12],"info"]="Cheminements_cyclables-2x"
+q13="""(	-- Soit
 	(	-- une route à double sens
 		(
 			"oneway" IS NULL
@@ -562,7 +563,7 @@ q12 = """(	-- Soit
 
 """
 # line_gpd_clipped.loc[osmid_bike_type[13],"info"]="Double-sens_cyclables_sans_bande"
-q13 = """-- Soit tagué avec le schema opposite
+q14="""-- Soit tagué avec le schema opposite
 
 (	-- une route à sens unique
 	"oneway" IN ('yes','-1')
@@ -644,7 +645,7 @@ OR
 )
  """
 # line_gpd_clipped.loc[osmid_bike_type[14],"info"]="Doubles-sens_cyclables_en_bande-D"
-q14 = """ -- Double-sens cyclables avec bandes (compter une fois)
+q15=""" -- Double-sens cyclables avec bandes (compter une fois)
 
 -- Cas pour les opposite_lane
 
@@ -683,7 +684,7 @@ OR
 )
 """
 # line_gpd_clipped.loc[osmid_bike_type[15],"info"]="Doubles-sens_cyclables_en_bande-G"
-q15 = """ -- Double-sens cyclables avec bandes (compter une fois)
+q16=""" -- Double-sens cyclables avec bandes (compter une fois)
 
 -- Cas pour les opposite_lane
 
@@ -725,7 +726,7 @@ OR
 )
  """
 # line_gpd_clipped.loc[osmid_bike_type[16],"info"]="Doubles-sens_cyclables_piste-D"
-q16 = """ -- Double-sens cyclables avec bandes (compter une fois)
+q17= """ -- Double-sens cyclables avec bandes (compter une fois)
 
 -- Cas pour les opposite_lane
 
@@ -764,7 +765,7 @@ OR
 )
 """
 # line_gpd_clipped.loc[osmid_bike_type[17],"info"]="Doubles-sens_cyclables_piste-G"
-q17 = """-- Double-sens cyclables piste (compter une fois)
+q18="""-- Double-sens cyclables piste (compter une fois)
 
 -- Cas pour les opposite_track
 
@@ -806,7 +807,7 @@ OR
 )
  """
 # line_gpd_clipped.loc[osmid_bike_type[18],"info"]="Footway_path_designated-1x"
-q18 = """(
+q19="""(
 	"oneway" IN ('yes','-1')
 	OR
 	"oneway:bicycle" IN ('yes','-1')
@@ -853,9 +854,9 @@ AND
         )
     )
 )
-  """
+  """ 
 # line_gpd_clipped.loc[osmid_bike_type[19],"info"]="Footway_path_designated-2x "
-q19 = """ (
+q20=""" (
 	( "oneway" IS NULL OR "oneway" NOT IN ('yes','-1'))
 	AND
 	( "oneway:bicycle" IS NULL OR "oneway:bicycle" NOT IN ('yes','-1'))
@@ -904,8 +905,8 @@ AND
     )
 )
 """
-# line_gpd_clipped.loc[osmid_bike_type[20],"info"]="Limite_a_30"
-q20 = """ -- Sont comptabilisés uniquement les voies limitees à 30 et pas les zones 30
+# line_gpd_clipped.loc[osmid_bike_type[20],"info"]="Limite_a_30-1x"
+q21=""" -- Sont comptabilisés uniquement les voies limitees à 30 et pas les zones 30
 -- Seul le sens voiture est pris en compte
 
 "maxspeed" LIKE '30'
@@ -915,13 +916,32 @@ AND
 	AND
 	( "source:maxspeed" IS NULL OR "source:maxspeed" NOT LIKE 'FR:zone30')
 )
-
+AND "oneway" IN ('yes','-1')
 """
-# line_gpd_clipped.loc[osmid_bike_type[23],"info"]="Pedestrian"
-q21 = """-- Seul le sens voiture est pris en compte
+# line_gpd_clipped.loc[osmid_bike_type[21],"info"]="Limite_a_30-2x"
+q22="""-- Sont comptabilisés uniquement les voies limitees à 30 et pas les zones 30
+-- Seul le sens voiture est pris en compte
 
-"highway" LIKE 'pedestrian'
+"maxspeed" LIKE '30'
+AND
+(
+	( "zone:maxspeed" IS NULL OR "zone:maxspeed" NOT LIKE 'FR:30')
+	AND
+	( "source:maxspeed" IS NULL OR "source:maxspeed" NOT LIKE 'FR:zone30')
+)
+AND
+(
+	"oneway" IS NULL
+	OR
+	"oneway" LIKE 'no'
+)
+"""
+# line_gpd_clipped.loc[osmid_bike_type[22],"info"]="Pedestrian_1x"
+q23="""-- Seul le sens voiture est pris en compte
 
+"highway" IN ('pedestrian')
+AND
+"oneway" IN ('yes','-1')
 AND
 (
 	"bicycle" IS NULL
@@ -929,9 +949,25 @@ AND
 	"bicycle" NOT IN ('no')
 )
  """
+# line_gpd_clipped.loc[osmid_bike_type[23],"info"]="Pedestrian_2x."
+q24="""-- Seul le sens voiture est pris en compte
 
+"highway" LIKE 'pedestrian'
+AND
+(
+	"oneway" IS NULL
+	OR
+	"oneway" LIKE 'no'
+)
+AND
+(
+	"bicycle" IS NULL
+	OR
+	"bicycle" NOT IN ('no')
+)
+ """
 # line_gpd_clipped.loc[osmid_bike_type[24],"info"]="Pistes_cyclables-1xD."
-q22 = """ (-- A - Soit la piste cyclable est séparée et à sens unique
+q25=""" (-- A - Soit la piste cyclable est séparée et à sens unique
 	"oneway" IN ('yes')
 	AND
 	"highway" LIKE 'cycleway'
@@ -998,7 +1034,7 @@ OR
 )
 """
 # line_gpd_clipped.loc[osmid_bike_type[25],"info"]="Pistes_cyclables-1xG"
-q23 = """(	-- soit la piste cyclable est à gauche de manière implicie
+q26="""(	-- soit la piste cyclable est à gauche de manière implicie
 		"cycleway" IN ('track')
 		AND
 		"oneway" IN ('-1')
@@ -1077,7 +1113,7 @@ OR
 )
  """
 # line_gpd_clipped.loc[osmid_bike_type[26],"info"]="Pistes_cyclables-2x"
-q24 = """(	-- A - Soit la route est à double sens avec des pistes cyclables ratachées de part et d'autre, soit il s'agit d'une piste cyclable indépendante à double sens :
+q27="""(	-- A - Soit la route est à double sens avec des pistes cyclables ratachées de part et d'autre, soit il s'agit d'une piste cyclable indépendante à double sens :
 	(	-- la route ou la piste cyclable est à double sens
 		"oneway" IS NULL
 		OR "oneway" NOT IN ('yes','-1')
@@ -1101,7 +1137,7 @@ q24 = """(	-- A - Soit la route est à double sens avec des pistes cyclables rat
 )
  """
 # line_gpd_clipped.loc[osmid_bike_type[27],"info"]="Pistes_cyclables-2xD"
-q25 = """-- Une piste cyclable à double sens d'un seul côté de la route (:left/right), rattachée à une route (track) qui peut être à sens unique ou pas :
+q28="""-- Une piste cyclable à double sens d'un seul côté de la route (:left/right), rattachée à une route (track) qui peut être à sens unique ou pas :
 	(	-- ou la piste peut être à droite
 		"cycleway:right" IN ('track','opposite_track')
 		AND
@@ -1109,7 +1145,7 @@ q25 = """-- Une piste cyclable à double sens d'un seul côté de la route (:lef
 	)
  """
 # line_gpd_clipped.loc[osmid_bike_type[28],"info"]="Pistes_cyclables-2xG"
-q26 = """ -- Une piste cyclable à double sens d'un seul côté de la route (:left/right), rattachée à une route (track) qui peut être à sens unique ou pas :
+q29=""" -- Une piste cyclable à double sens d'un seul côté de la route (:left/right), rattachée à une route (track) qui peut être à sens unique ou pas :
 	(	-- la piste peut être à gauche
 		"cycleway:left" IN ('track','opposite_track')
 		AND
@@ -1118,7 +1154,7 @@ q26 = """ -- Une piste cyclable à double sens d'un seul côté de la route (:le
 
 """
 # line_gpd_clipped.loc[osmid_bike_type[29],"info"]="Pistes_sur_Trottoirs-1x"
-q27 = """ "segregated" LIKE 'yes'
+q30=""" "segregated" LIKE 'yes'
 AND
 "highway" LIKE 'footway'
 AND
@@ -1133,7 +1169,7 @@ AND
 )
 """
 # line_gpd_clipped.loc[osmid_bike_type[30],"info"]="Pistes_sur_Trottoirs-1xD"
-q28 = """( --modélisation avec un way séparé
+q31="""( --modélisation avec un way séparé
     "segregated" LIKE 'yes'
     AND
     "highway" LIKE 'footway'
@@ -1174,7 +1210,7 @@ OR
 )
  """
 # line_gpd_clipped.loc[osmid_bike_type[31],"info"]="Pistes_sur_Trottoirs-1xG"
-q29 = """( --modélisation avec un way séparé
+q32="""( --modélisation avec un way séparé
     "segregated" LIKE 'yes'
     AND
     "highway" LIKE 'footway'
@@ -1215,7 +1251,7 @@ OR
 )
  """
 # line_gpd_clipped.loc[osmid_bike_type[32],"info"]="Pistes_sur_Trottoirs-2x"
-q30 = """( --modélisation avec un way séparé
+q33="""( --modélisation avec un way séparé
     "segregated" LIKE 'yes'
     AND
     "highway" LIKE 'footway'
@@ -1261,7 +1297,7 @@ OR
 )
  """
 # line_gpd_clipped.loc[osmid_bike_type[33],"info"]="Routes_services_chemins_agricoles-1x"
-q31 = """-- Les voies particulières de type track et service
+q34="""-- Les voies particulières de type track et service
 
 "highway" IN ('track','service','unclasified','residential','tertiary','secondary','primary')
 AND
@@ -1367,11 +1403,11 @@ AND
 		OR
 		"oneway:bicycle" IN ('yes','-1')
 	)
-	-- il ne peut pas s'agir de double-sens cyclables car il n'y a pas de véhicules à moteur "oneway:bicycle"='no'
+	-- il ne peut pas s'agire de double-sens cyclables car il n'y a pas de véhicules à moteur "oneway:bicycle"='no'
 )
  """
 # line_gpd_clipped.loc[osmid_bike_type[34],"info"]="Routes_services_chemins_agricoles-2x"
-q32 = """ -- Les voies particulières de type track et service
+q35=""" -- Les voies particulières de type track et service
 "highway" IN ('track','service','unclasified','residential','tertiary','secondary','primary')
 AND
 (   -- Elles ont un revetement circulable au VTC vélo de randonnée
@@ -1481,7 +1517,7 @@ AND
 )
 """
 # line_gpd_clipped.loc[osmid_bike_type[35],"info"]="Trottoirs_cyclables-1x"
-q33 = """("segregated" IS NULL OR "segregated" NOT IN  ('yes'))
+q36="""("segregated" IS NULL OR "segregated" NOT IN  ('yes'))
 AND
 "highway" LIKE 'footway'
 AND
@@ -1497,7 +1533,7 @@ AND
 
  """
 # line_gpd_clipped.loc[osmid_bike_type[36],"info"]="Trottoirs_cyclables-1xD"
-q34 = """ ( --modélisation avec un way séparé
+q37=""" ( --modélisation avec un way séparé
     ( "segregated" IS NULL OR "segregated" NOT IN  ('yes'))
     AND
     "highway" LIKE 'footway'
@@ -1546,7 +1582,7 @@ OR
 )
 """
 # line_gpd_clipped.loc[osmid_bike_type[37],"info"]="Trottoirs_cyclables-1xG"
-q35 = """( --modélisation avec un way séparé
+q38="""( --modélisation avec un way séparé
     ( "segregated" IS NULL OR "segregated" NOT IN  ('yes'))
     AND
     "highway" LIKE 'footway'
@@ -1595,7 +1631,7 @@ OR
 )
  """
 # line_gpd_clipped.loc[osmid_bike_type[38],"info"]="Trottoirs_cyclables-2x"
-q36 = """ ( --modélisation avec un way séparé
+q39=""" ( --modélisation avec un way séparé
     ( "segregated" IS NULL OR "segregated" NOT IN  ('yes'))
     AND
     "highway" LIKE 'footway'
@@ -1649,7 +1685,7 @@ OR
 )
 """
 # line_gpd_clipped.loc[osmid_bike_type[39],"info"]="Voies_bus-1xD"
-q37 = """(	-- A - Les cas où la voie est à sens unique
+q40="""(	-- A - Les cas où la voie est à sens unique
 	"oneway" IN ('yes')
 	AND
 	(
@@ -1757,7 +1793,7 @@ OR
 )
  """
 # line_gpd_clipped.loc[osmid_bike_type[40],"info"]="Voies_bus-1xG"
-q38 = """(	-- A - Les cas où la voie est à sens unique
+q41="""(	-- A - Les cas où la voie est à sens unique
 	"oneway" IN ('-1')
 	AND
 	(
@@ -1862,7 +1898,7 @@ OR
 )
  """
 # line_gpd_clipped.loc[osmid_bike_type[41],"info"]="Voies_bus-2x"
-q39 = """-- On part du postula qu'une voie de bus en opposite_lane n'est pas un contre sens cyclable
+q42="""-- On part du postula qu'une voie de bus en opposite_lane n'est pas un contre sens cyclable
 -- Seules les voies de bus accessibles aux vélos sont comptabilisées
 
 (
@@ -1994,16 +2030,71 @@ OR
     )
 )
  """
-# line_gpd_clipped.loc[osmid_bike_type[42],"info"]="Voies_vertes"
-q40 = """
-"highway" = 'path'
+# line_gpd_clipped.loc[osmid_bike_type[42],"info"]="Voies_vertes-1x"
+q43="""(
+	"oneway" IN ('yes','-1')
+	OR
+	"oneway:bicycle" IN ('yes','-1')
+)
 AND
-"bicycle" = 'designated'
-AND
-"foot" = 'designated'
+(
+	(
+		"highway" = 'path'
+		AND
+		"bicycle" = 'designated'
+		AND
+		"foot" = 'designated'
+	)
+)
+
  """
-# line_gpd_clipped.loc[osmid_bike_type[44],"info"]="Zones_30"
-q41 = """-- Sont comptabilisés uniquement les zones 30 et pas les voies limitees à 30
+# line_gpd_clipped.loc[osmid_bike_type[43],"info"]="Voies_vertes-2x"
+q44="""(
+	(
+		"oneway" IS NULL
+		OR
+		"oneway" LIKE 'no'
+	)
+	AND
+	(
+		"oneway:bicycle" IS NULL
+		OR
+		"oneway:bicycle" LIKE 'no'
+	)
+)
+AND
+(
+	(
+		"highway" = 'path'
+		AND
+		"bicycle" = 'designated'
+		AND
+		"foot" = 'designated'
+	)
+)
+ """
+# line_gpd_clipped.loc[osmid_bike_type[44],"info"]="Zones_30-1x"
+q45="""-- Sont comptabilisés uniquement les zones 30 et pas les voies limitees à 30
+-- Seul le sens voiture est pris en compte
+
+"maxspeed" LIKE '30'
+AND
+(
+	"zone:maxspeed" LIKE 'FR:30'
+	OR
+	"source:maxspeed" LIKE 'FR:zone30'
+)
+AND "oneway" IN ('yes','-1')
+AND
+(
+	"bicycle" IS NULL
+	OR
+	"bicycle" NOT IN ('no')
+)
+
+ """
+# line_gpd_clipped.loc[osmid_bike_type[45],"info"]="Zones_30-2x"
+q46="""-- Sont comptabilisés uniquement les zones 30 et pas les voies limitees à 30
 -- Seul le sens voiture est pris en compte
 
 "maxspeed" LIKE '30'
@@ -2015,38 +2106,73 @@ AND
 )
 AND
 (
+	"oneway" IS NULL
+	OR
+	"oneway" LIKE 'no'
+)
+AND
+(
 	"bicycle" IS NULL
 	OR
 	"bicycle" NOT IN ('no')
 )
-
  """
-
-# line_gpd_clipped.loc[osmid_bike_type[46],"info"]="Zones_rencontre"
-q42 = """
-
---soit une voie de type living street
+# line_gpd_clipped.loc[osmid_bike_type[46],"info"]="Zones_rencontre-1x"
+q47="""-- Seul le sens voiture est pris en compte
+--Une voie en sens unique
 (
-"highway" LIKE 'living_street'
+"oneway" IN ('yes','-1')
+)
 
-OR
+AND
 
---soit une voie avec le tag zone:maxspeed ou source:maxspeed
-	( 
-	"maxspeed"='20'
-	AND
-		(
-		"zone:maxspeed"='FR:20'
-		OR
-		"source:maxspeed"='FR:zone20'
+	--soit une voie de type living street
+	(
+	"highway" LIKE 'living_street'
+
+	OR
+	
+	--soit une voie avec le tag zone:maxspeed ou source:maxspeed
+		( 
+		"maxspeed"='20'
+		AND
+			(
+			"zone:maxspeed"='FR:20'
+			OR
+			"source:maxspeed"='FR:zone20'
+			)
 		)
 	)
-)
  """
+# line_gpd_clipped.loc[osmid_bike_type[47],"info"]="Zones_rencontre-2x"
+q48="""--A double sens 
+(
+"oneway" IS NULL
+OR
+"oneway" LIKE 'no'
+)
 
+AND
+	--soit une voie de type living street
+	(
+	"highway" LIKE 'living_street'
 
-# line_gpd_clipped.loc[osmid_bike_type[48],"info"]="chaucidou" -> Piste cyclable
-q43 = """(	-- Soit
+	OR
+	
+	--soit une voie avec le tag zone:maxspeed ou source:maxspeed
+		( 
+		"maxspeed"='20'
+		AND
+			(
+			"zone:maxspeed"='FR:20'
+			OR
+			"source:maxspeed"='FR:zone20'
+			)
+		)
+	)
+ """
+# line_gpd_clipped.loc[osmid_bike_type[48],"info"]="chaucidou"
+q49="""(	-- Soit
 	(	-- une route explicitement à double sens
 		(
 			"oneway" LIKE 'no' OR oneway IS NULL
@@ -2075,34 +2201,47 @@ q43 = """(	-- Soit
 	)
 )
  """
-
-# line_gpd_clipped.loc[osmid_bike_type[49],"info"]="escalier"
-q44 = """
+# line_gpd_clipped.loc[osmid_bike_type[49],"info"]="escalier-1xD"
+q50="""
 -- Sont comptabilisés uniquement les escaliers ayant un aménagement pour les vélos
 
 "highway" = 'steps' -- un escalier
 
 AND
 --avec une goulotte pour les vélos sur le coté droit
-(
-	( "ramp:bicycle:right" = 'yes')
-
-	OR 
-
-	( "ramp:bicycle:left" = 'yes' )
-
-    OR 
-    
-	( "ramp:bicycle" = 'yes' )
-	OR
-	( "ramp:bicycle:both" = 'yes' )
-
-)
-
+"ramp:bicycle:right" = 'yes'
  """
+# line_gpd_clipped.loc[osmid_bike_type[50],"info"]="escalier-1xG"
+q51="""-- Sont comptabilisés uniquement les escaliers ayant un aménagement pour les vélos
 
+"highway" = 'steps' -- un escalier
+
+AND
+--avec une goulotte pour les vélos sur le coté gauche
+"ramp:bicycle:left" = 'yes'
+ """
+# line_gpd_clipped.loc[osmid_bike_type[51],"info"]="escalier-2x"
+q52="""
+-- Sont comptabilisés uniquement les escaliers ayant un aménagement pour les vélos
+
+"highway" = 'steps' -- un escalier
+
+AND
+
+(
+    "ramp:bicycle" = 'yes' --avec une goulotte pour les vélos sans précision de coté
+    OR
+    "ramp:bicycle:both" = 'yes'
+    OR
+    (  --avec une goulotte pour les vélos de chaque coté
+        "ramp:bicycle:right" = 'yes'
+        AND
+        "ramp:bicycle:left" = 'yes'
+    )
+)
+ """
 # line_gpd_clipped.loc[osmid_bike_type[52],"info"]="footway_permissive-1x"
-q45 = """(
+q53="""(
 	"oneway" IN ('yes','-1')
 	OR
 	"oneway:bicycle" IN ('yes','-1')
@@ -2146,7 +2285,7 @@ AND
 
  """
 # line_gpd_clipped.loc[osmid_bike_type[53],"info"]="footway_permissive-2x"
-q46 = """(
+q54="""(
 	( "oneway" IS NULL OR "oneway" NOT IN ('yes','-1'))
 	AND
 	( "oneway:bicycle" IS NULL OR "oneway" NOT IN ('yes','-1'))
@@ -2188,12 +2327,14 @@ AND
     )
 )
  """
-# line_gpd_clipped.loc[osmid_bike_type[54],"info"]="velorue"
-q47 = """(
+# line_gpd_clipped.loc[osmid_bike_type[54],"info"]="velorue-1x"
+q55="""(
     "cyclestreet" = 'yes'
     OR
     "bicycle_road" = 'yes'
 )
+
+AND "oneway" IN ('yes','-1')
 
 AND
 (
@@ -2202,74 +2343,46 @@ AND
 	"bicycle" NOT IN ('no')
 )
  """
-
-
-# line_gpd_clipped.loc[osmid_bike_type[58],"info"]="Limite_a_20-1x"
-q48 = """ 
-
-"maxspeed" LIKE '20'
-
+# line_gpd_clipped.loc[osmid_bike_type[55],"info"]="velorue-2x"
+q56="""(
+    "cyclestreet" = 'yes'
+    OR
+    "bicycle_road" = 'yes'
+)
+AND
+(
+	"oneway" IS NULL
+	OR
+	"oneway" LIKE 'no'
+)
+AND
+(
+	"bicycle" IS NULL
+	OR
+	"bicycle" NOT IN ('no')
+)
 """
 
-# line_gpd_clipped.loc[osmid_bike_type[60],"info"]="Limite_a_50-1x"
-q49 = """ 
+# all network 1x
 
-"maxspeed" LIKE '50'
+q57="""-- Seul le sens voiture est pris en compte
 
-"""
+    "oneway" IS NULL
 
+    OR
 
-# all in a array
+    "oneway" LIKE 'no'
 
-queries = [
-    q0,
-    q1,
-    q2,
-    q3,
-    q4,
-    q5,
-    q6,
-    q7,
-    q8,
-    q9,
-    q10,
-    q11,
-    q12,
-    q13,
-    q14,
-    q15,
-    q16,
-    q17,
-    q18,
-    q19,
-    q20,
-    q21,
-    q22,
-    q23,
-    q24,
-    q25,
-    q26,
-    q27,
-    q28,
-    q29,
-    q30,
-    q31,
-    q32,
-    q33,
-    q34,
-    q35,
-    q36,
-    q37,
-    q38,
-    q39,
-    q40,
-    q41,
-    q42,
-    q43,
-    q44,
-    q45,
-    q46,
-    q47,
-    q48,
-    q49,
-]
+ """
+
+# all network 2x
+
+q58="""-- Seul le sens voiture est pris en compte
+
+"oneway" IN ('yes','-1')
+
+ """
+
+#all in a array
+
+queries=[q1,q2,q3,q4,q5,q6,q7,q8,q9,q10,q11,q12,q13,q14,q15,q16,q17,q18,q19,q20,q21,q22,q23,q24,q25,q26,q27,q28,q29,q30,q31,q32,q33,q34,q35,q36,q37,q38,q39,q40,q41,q42,q43,q44,q45,q46,q47,q48,q49,q50,q51,q52,q53,q54,q55,q56,q57,q58]
