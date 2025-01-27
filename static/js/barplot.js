@@ -13,7 +13,7 @@ var layout = {
 Plotly.newPlot('chart', data, layout);
 
 // Téléchargement de l'histogramme en JPEG
-document.getElementById('download-button').addEventListener('click', function () {
+document.getElementById('download-barplot').addEventListener('click', function () {
     Plotly.toImage(document.getElementById('chart'), { format: 'jpeg', width: 800, height: 600 })
         .then(function (imageData) {
             var link = document.createElement('a');

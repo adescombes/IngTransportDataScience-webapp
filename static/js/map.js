@@ -48,7 +48,6 @@ map.on(L.Draw.Event.CREATED, function (event) {
     console.log('Coordonnées stockées :', currentCoordinates);
 });
 
-// Gestion du bouton "RUN"
 document.getElementById('run-button').addEventListener('click', function (event) {
     event.preventDefault(); // Empêche le comportement par défaut
 
@@ -74,8 +73,11 @@ document.getElementById('run-button').addEventListener('click', function (event)
         .then((data) => {
             console.log("Réponse du backend :", data);
             if (data.geojson) {
+                // Mettre à jour currentGeoJSON avec les données reçues
+                currentGeoJSON = JSON.parse(data.geojson);
+
                 // Ajouter la couche GeoJSON à la carte
-                var geojsonLayer = L.geoJSON(JSON.parse(data.geojson), {
+                var geojsonLayer = L.geoJSON(currentGeoJSON, {
                     style: {
                         color: "blue",
                         weight: 2,
@@ -86,7 +88,49 @@ document.getElementById('run-button').addEventListener('click', function (event)
                 console.log('Les données sont affichées sur la carte.');
             } else {
                 console.error("Aucun GeoJSON retourné.");
+                alert("Aucune donnée disponible pour la zone sélectionnée.");
             }
         })
         .catch((error) => console.error("Erreur :", error));
+});
+
+
+let currentGeoJSON = null; // Variable pour stocker les données GeoJSON
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('download-osm-data').addEventListener('click', function () {
+        if (!currentGeoJSON) {
+            alert("Veuillez d'abord dessiner une zone et charger les données.");
+            return;
+        }
+
+        console.log('Bouton DOWNLOAD cliqué, téléchargement des données en cours...');
+
+        // Envoyer une requête pour télécharger le CSV
+        fetch("/download-csv", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ geojson: currentGeoJSON }), // Vous devez stocker currentGeoJSON
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                // Créer un lien pour télécharger le fichier
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.style.display = "none";
+                a.href = url;
+                a.download = "osm_data.csv";
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                console.log("Fichier CSV téléchargé avec succès.");
+            })
+            .catch(error => console.error("Erreur :", error));
+    });
 });

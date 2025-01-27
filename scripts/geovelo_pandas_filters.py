@@ -1,70 +1,1384 @@
-# q1
+def geovelo_pandas_filters(df):
 
-# Masque pour les routes à double sens avec accotement cyclable d'un côté
-mask_double_sens = (
-    (df['oneway'].isnull() | ~df['oneway'].isin(['yes', '-1'])) &
-    (df['cycleway:right'] == 'shoulder') &
-    (df['cycleway:left'].isnull() | ~df['cycleway:left'].isin(['shoulder']))
-)
+    df["info"] = "0"
+    df["info_regrouped"] = "0"
 
-# Masque pour les routes à sens unique avec accotement cyclable
-mask_sens_unique = (
-    ((df['oneway'] == 'yes') | (df['junction'].isin(['roundabout', 'circular']))) &
-    ((df['cycleway'] == 'shoulder') | (df['cycleway:right'] == 'shoulder'))
-)
+    # q1
 
-# Masque pour les routes à sens inverse avec accotement à gauche
-mask_sens_inverse = (
-    (df['oneway'] == '-1') & (df['cycleway:left'] == 'shoulder')
-)
-
-# Combinaison des masques
-filtered_df_q1 = df[mask_double_sens | mask_sens_unique | mask_sens_inverse]
-
-# q2
-
-# Masque pour les routes à double sens avec accotement cyclable à gauche
-mask_double_sens_left = (
-    (df['oneway'].isnull() | ~df['oneway'].isin(['yes', '-1'])) &
-    (df['cycleway:left'] == 'shoulder') &
-    (df['cycleway:right'].isnull() | ~df['cycleway:right'].isin(['shoulder']))
-)
-
-# Masque pour les routes à sens unique avec accotement cyclable à gauche
-mask_sens_unique_left = (
-    ((df['oneway'] == 'yes') | (df['junction'].isin(['roundabout', 'circular']))) &
-    (df['cycleway:left'] == 'shoulder')
-)
-
-# Masque pour les routes à sens inverse avec accotement cyclable à gauche
-mask_sens_inverse_left = (
-    (df['oneway'] == '-1') &
-    ((df['cycleway:left'] == 'shoulder') | (df['cycleway'] == 'shoulder'))
-)
-
-# Combinaison des masques
-filtered_df_q2 = df[mask_double_sens_left | mask_sens_unique_left | mask_sens_inverse_left]
-
-
-# q3
-
-mask_double_sens_both = (
-    (df['oneway'].isnull() | (df['oneway'] == 'no')) &
-    (
-        (df['cycleway'] == 'shoulder') |
-        ((df['cycleway:right'] == 'shoulder') & (df['cycleway:left'] == 'shoulder')) |
-        (df['cycleway:both'] == 'shoulder')
+    mask_q1 = (
+        (
+            (df["oneway"].isnull() | ~df["oneway"].isin(["yes", "-1"]))
+            & (df["cycleway:right"] == "shoulder")
+            & (df["cycleway:left"].isnull() | ~df["cycleway:left"].isin(["shoulder"]))
+        )
+        | ((df["oneway"] == "yes") | (df["junction"].isin(["roundabout", "circular"])))
+        & ((df["cycleway"] == "shoulder") | (df["cycleway:right"] == "shoulder"))
+        | (df["oneway"] == "-1") & (df["cycleway:left"] == "shoulder")
     )
-)
 
-filtered_df_q3 = df[mask_double_sens_both]
+    df.loc["mask_q1", "info"] = "Accotements_cyclables-1xD"
+    df.loc["mask_q1", "info_regrouped"] = "Accotements_cyclables"
 
-# q4
+    # q2
 
-mask_shared_path = (
-    (df['highway'].isin(['footway', 'path'])) &
-    (df['bicycle'] == 'designated') &
-    (df['segregated'].isnull() | (df['segregated'] == 'no'))
-)
+    mask_q2 = (
+        (
+            (df["oneway"].isnull() | ~df["oneway"].isin(["yes", "-1"]))
+            & (df["cycleway:left"] == "shoulder")
+            & (df["cycleway:right"].isnull() | ~df["cycleway:right"].isin(["shoulder"]))
+        )
+        | ((df["oneway"] == "yes") | (df["junction"].isin(["roundabout", "circular"])))
+        & (df["cycleway:left"] == "shoulder")
+        | (df["oneway"] == "-1")
+        & ((df["cycleway:left"] == "shoulder") | (df["cycleway"] == "shoulder"))
+    )
 
-filtered_df_q4 = df[mask_shared_path]
+    df.loc["mask_q2", "info"] = "Accotements_cyclables-1xG"
+    df.loc["mask_q2", "info_regrouped"] = "Accotements_cyclables"
+
+    # q3
+
+    mask_q3 = (df["oneway"].isnull() | (df["oneway"] == "no")) & (
+        (df["cycleway"] == "shoulder")
+        | ((df["cycleway:right"] == "shoulder") & (df["cycleway:left"] == "shoulder"))
+        | (df["cycleway:both"] == "shoulder")
+    )
+
+    df.loc["mask_q3", "info"] = "Accotements_cyclables-2x"
+    df.loc["mask_q3", "info_regrouped"] = "Accotements_cyclables"
+
+    # q4
+
+    mask_q4 = (
+        (df["highway"].isin(["footway", "path"]))
+        & (df["bicycle"] == "designated")
+        & (df["segregated"].isnull() | (df["segregated"] == "no"))
+    )
+
+    df.loc["mask_q4", "info"] = "Autres_chemins_piéton_autorisé_aux_vélos-1x"
+    df.loc["mask_q4", "info_regrouped"] = "Autres_chemins_piéton_autorisé_aux_vélos"
+
+    # q5
+    mask_q5 = (
+        (
+            (df["oneway"].isnull() | ~df["oneway"].isin(["yes", "-1"]))
+            & (df["oneway:bicycle"].isnull() | ~df["oneway"].isin(["yes", "-1"]))
+        )
+        & (
+            (
+                (df["highway"] == "footway")
+                & (df["footway"].isnull() | ~df["footway"].isin(["sidewalk"]))
+                & (df["bicycle"].isin(["yes", "destination"]))
+            )
+            | ((df["highway"] == "path") & (df["bicycle"].isin(["yes", "destination"])))
+        )
+        & (
+            (
+                (
+                    df["surface"].isin(
+                        [
+                            "paved",
+                            "asphalt",
+                            "concrete",
+                            "concrete:plates",
+                            "concrete:lanes",
+                            "paving_stones",
+                            "sett",
+                            "unhewn_cobblestone",
+                            "cobblestone",
+                            "metal",
+                            "wood",
+                            "unpaved",
+                            "compacted",
+                            "fine_gravel",
+                            "gravel",
+                            "pebblestone",
+                            "ground",
+                            "tartan",
+                            "clay",
+                            "metal_grid",
+                        ]
+                    )
+                    | df["surface"].isnull()
+                )
+                & (
+                    df["smoothness"].isnull()
+                    | ~df["smoothness"].isin(
+                        ["bad", "very_bad", "horrible", "very_horrible", "impassable"]
+                    )
+                )
+                & (
+                    df["tracktype"].isnull()
+                    | ~df["tracktype"].isin(["grade3", "grade4", "grade5"])
+                )
+            )
+        )
+    )
+
+    df.loc["mask_q5", "info"] = "Autres_chemins_piéton_autorisé_aux_vélos-2x"
+    df.loc["mask_q5", "info_regrouped"] = "Autres_chemins_piéton_autorisé_aux_vélos"
+
+    # q6
+    mask_q6 = (
+        (
+            (df["oneway"].isnull() | ~df["oneway"].isin(["yes", "-1"]))
+            & (
+                (df["cycleway:right"] == "lane")
+                & (df["cycleway:left"].isnull() | ~df["cycleway:left"].isin(["lane"]))
+            )
+        )
+        | (
+            (
+                (df["oneway"] == "yes")
+                | (df["junction"].isin(["roundabout", "circular"]))
+            )
+            & (((df["cycleway"] == "lane") | (df["cycleway:right"] == "lane")))
+        )
+        | (
+            (df["oneway"] == "-1")
+            & (
+                (df["cycleway:right"] == "lane")
+                & (df["oneway:bicycle"].isnull() | (df["oneway:bicycle"] != "no"))
+            )
+        )
+    )
+
+    df.loc["mask_q6", "info"] = "Bandes_cyclables-1xD"
+    df.loc["mask_q6", "info_regrouped"] = "Bandes_cyclables"
+
+    # q7
+    mask_q7 = (
+        (
+            (df["oneway"].isnull() | ~df["oneway"].isin(["yes", "-1"]))
+            & (
+                (df["cycleway:left"] == "lane")
+                & (df["cycleway:right"].isnull() | ~df["cycleway:right"].isin(["lane"]))
+            )
+        )
+        | (
+            (
+                (df["oneway"] == "yes")
+                | (df["junction"].isin(["roundabout", "circular"]))
+            )
+            & (
+                (df["cycleway:left"] == "lane")
+                & (df["oneway:bicycle"].isnull() | (df["oneway:bicycle"] != "no"))
+            )
+        )
+        | (
+            (df["oneway"] == "-1")
+            & ((df["cycleway:left"] == "lane") | (df["cycleway"] == "lane"))
+        )
+    )
+
+    df.loc["mask_q7", "info"] = "Bandes_cyclables-1xG"
+    df.loc["mask_q7", "info_regrouped"] = "Bandes_cyclables"
+
+    # q8
+    mask_q8 = (
+        (
+            (df["oneway"].isnull() | (df["oneway"] == "no"))
+            & (
+                df["junction"].isnull()
+                | ~df["junction"].isin(["roundabout", "circular"])
+            )
+        )
+        & (
+            (df["cycleway"].isin(["lane", "opposite_lane"]))
+            | (
+                (df["cycleway:right"].isin(["lane", "opposite_lane"]))
+                & (df["cycleway:left"].isin(["lane", "opposite_lane"]))
+            )
+            | (df["cycleway:both"].isin(["lane", "opposite_lane"]))
+        )
+        & ((df["lanes"].isnull() | ~df["lanes"].isin(["1"])))
+    )
+
+    df.loc["mask_q8", "info"] = "Bandes_cyclables-2x"
+    df.loc["mask_q8", "info_regrouped"] = "Bandes_cyclables"
+
+    # q9
+    mask_q9 = df["cycleway:right"].isin(["lane", "opposite_lane"])
+
+    df.loc["mask_q9", "info"] = "Bandes_cyclables-2xD"
+    df.loc["mask_q9", "info_regrouped"] = "Bandes_cyclables"
+
+    # q10
+    mask_q10 = df["cycleway:left"].isin(["lane", "opposite_lane"])
+
+    df.loc["mask_q10", "info"] = "Bandes_cyclables-2xG"
+    df.loc["mask_q10", "info_regrouped"] = "Bandes_cyclables"
+
+    # q11
+    mask_q11 = (
+        (
+            (df["oneway"].isnull() | ~df["oneway"].isin(["yes", "-1"]))
+            & (
+                (df["cycleway:right"] == "shared_lane")
+                & (
+                    df["cycleway:left"].isnull()
+                    | ~df["cycleway:left"].isin(["shared_lane"])
+                )
+            )
+        )
+        | (
+            (
+                (df["oneway"] == "yes")
+                | (df["junction"].isin(["roundabout", "circular"]))
+            )
+            & (
+                (df["cycleway"] == "shared_lane")
+                | (df["cycleway:right"] == "shared_lane")
+            )
+        )
+        | ((df["oneway"] == "-1") & (df["cycleway:left"] == "shared_lane"))
+    )
+
+    df.loc["mask_q11", "info"] = "Cheminements_cyclables-1xD"
+    df.loc["mask_q11", "info_regrouped"] = "Cheminements_cyclables"
+
+    # q12
+    mask_q12 = (
+        (
+            (df["oneway"].isnull() | ~df["oneway"].isin(["yes", "-1"]))
+            & (
+                (df["cycleway:left"] == "shared_lane")
+                & (
+                    df["cycleway:right"].isnull()
+                    | ~df["cycleway:right"].isin(["shared_lane"])
+                )
+            )
+        )
+        | (
+            (
+                (df["oneway"] == "yes")
+                | (df["junction"].isin(["roundabout", "circular"]))
+            )
+            & (
+                (df["cycleway:left"] == "shared_lane")
+                & (df["oneway:bicycle"].isnull() | (df["oneway:bicycle"] != "no"))
+            )
+        )
+        | (
+            (df["oneway"] == "-1")
+            & (
+                (df["cycleway:left"] == "shared_lane")
+                | (df["cycleway"] == "shared_lane")
+            )
+        )
+    )
+
+    df.loc["mask_q12", "info"] = "Cheminements_cyclables-1xG"
+    df.loc["mask_q12", "info_regrouped"] = "Cheminements_cyclables"
+
+    # q13
+    mask_q13 = (
+        (df["oneway"].isnull() | (df["oneway"] == "no"))
+        & (df["junction"].isnull() | ~df["junction"].isin(["roundabout", "circular"]))
+    ) & (
+        (df["cycleway"] == "shared_lane")
+        | (
+            (df["cycleway:right"] == "shared_lane")
+            & (df["cycleway:left"] == "shared_lane")
+        )
+        | (df["cycleway:both"] == "shared_lane")
+    )
+
+    df.loc["mask_q13", "info"] = "Cheminements_cyclables-2x"
+    df.loc["mask_q13", "info_regrouped"] = "Cheminements_cyclables"
+
+    # q14
+    mask_q14 = (
+        (
+            (df["oneway"].isin(["yes", "-1"]))
+            & (
+                (df["cycleway"] == "opposite")
+                | (df["cycleway:left"] == "opposite")
+                | (df["cycleway:right"] == "opposite")
+            )
+        )
+        | (
+            (df["oneway"] == "yes")
+            & (df["oneway:bicycle"] == "no")
+            & (
+                (df["cycleway"].isnull() | df["cycleway"].isin(["no", "shared_lane"]))
+                & (
+                    df["cycleway:left"].isnull()
+                    | df["cycleway:left"].isin(["no", "shared_lane"])
+                )
+                & (
+                    df["cycleway:both"].isnull()
+                    | df["cycleway:both"].isin(["no", "shared_lane"])
+                )
+            )
+        )
+        | (
+            (df["oneway"] == "-1")
+            & (df["oneway:bicycle"] == "no")
+            & (
+                (df["cycleway"].isnull() | df["cycleway"].isin(["no", "shared_lane"]))
+                & (
+                    df["cycleway:right"].isnull()
+                    | df["cycleway:right"].isin(["no", "shared_lane"])
+                )
+                & (
+                    df["cycleway:both"].isnull()
+                    | df["cycleway:both"].isin(["no", "shared_lane"])
+                )
+            )
+        )
+    )
+
+    df.loc["mask_q14", "info"] = "Doubles-sens_cyclables_sans_bande"
+    df.loc["mask_q14", "info_regrouped"] = "Double-sens_cyclables"
+
+    # q15
+    mask_q15 = (
+        (df["oneway"].isin(["yes", "-1"])) & (df["cycleway:right"] == "opposite_lane")
+    ) | (
+        (df["oneway"] == "-1")
+        & (
+            (df["cycleway"] == "opposite_lane")
+            | ((df["cycleway:right"] == "lane") & (df["oneway:bicycle"] == "no"))
+            | ((df["cycleway:both"] == "lane") & (df["oneway:bicycle"] == "no"))
+        )
+    )
+
+    df.loc["mask_q15", "info"] = "Doubles-sens_cyclables_en_bande-D"
+    df.loc["mask_q15", "info_regrouped"] = "Double-sens_cyclables"
+
+    # q16
+    mask_q16 = (
+        (df["oneway"].isin(["yes", "-1"])) & (df["cycleway:left"] == "opposite_lane")
+    ) | (
+        (df["oneway"] == "yes")
+        & (
+            (df["cycleway"] == "opposite_lane")
+            | ((df["cycleway:left"] == "lane") & (df["oneway:bicycle"] == "no"))
+            | ((df["cycleway:both"] == "lane") & (df["oneway:bicycle"] == "no"))
+        )
+    )
+
+    df.loc["mask_q16", "info"] = "Doubles-sens_cyclables_en_bande-G"
+    df.loc["mask_q16", "info_regrouped"] = "Double-sens_cyclables"
+
+    # q17
+    mask_q17 = (
+        (df["oneway"].isin(["yes", "-1"])) & (df["cycleway:right"] == "opposite_track")
+    ) | (
+        (df["oneway"] == "-1")
+        & (
+            (df["cycleway"] == "opposite_track")
+            | ((df["cycleway:right"] == "track") & (df["oneway:bicycle"] == "no"))
+            | ((df["cycleway:both"] == "track") & (df["oneway:bicycle"] == "no"))
+        )
+    )
+
+    df.loc["mask_q17", "info"] = "Doubles-sens_cyclables_piste-D"
+    df.loc["mask_q17", "info_regrouped"] = "Double-sens_cyclables"
+
+    # q18
+    mask_q18 = (
+        (df["oneway"].isin(["yes", "-1"])) & (df["cycleway:left"] == "opposite_track")
+    ) | (
+        (df["oneway"] == "yes")
+        & (
+            (df["cycleway"] == "opposite_track")
+            | ((df["cycleway:left"] == "track") & (df["oneway:bicycle"] == "no"))
+            | ((df["cycleway:both"] == "track") & (df["oneway:bicycle"] == "no"))
+        )
+    )
+
+    df.loc["mask_q18", "info"] = "Doubles-sens_cyclables_piste-G"
+    df.loc["mask_q18", "info_regrouped"] = "Double-sens_cyclables"
+
+    # q19
+    mask_q19 = (
+        (df["oneway"].isin(["yes", "-1"]) | df["oneway:bicycle"].isin(["yes", "-1"]))
+        & (
+            (
+                (df["highway"] == "footway")
+                & (df["footway"].isnull() | ~df["footway"].isin(["sidewalk"]))
+                & (df["bicycle"].isin(["designated", "official"]))
+            )
+            | (
+                (df["highway"] == "path")
+                & (df["bicycle"].isin(["designated", "official"]))
+                & (df["foot"].isnull() | ~df["foot"].isin(["designated"]))
+            )
+        )
+        & (
+            (
+                (
+                    df["surface"].isin(
+                        [
+                            "paved",
+                            "asphalt",
+                            "concrete",
+                            "concrete:plates",
+                            "concrete:lanes",
+                            "paving_stones",
+                            "sett",
+                            "unhewn_cobblestone",
+                            "cobblestone",
+                            "metal",
+                            "wood",
+                            "unpaved",
+                            "compacted",
+                            "fine_gravel",
+                            "gravel",
+                            "pebblestone",
+                            "ground",
+                            "tartan",
+                            "clay",
+                            "metal_grid",
+                        ]
+                    )
+                    | df["surface"].isnull()
+                )
+                & (
+                    df["smoothness"].isnull()
+                    | ~df["smoothness"].isin(
+                        ["bad", "very_bad", "horrible", "very_horrible", "impassable"]
+                    )
+                )
+                & (
+                    df["tracktype"].isnull()
+                    | ~df["tracktype"].isin(["grade3", "grade4", "grade5"])
+                )
+            )
+        )
+    )
+
+    df.loc["mask_q19", "info"] = "Footway_path_designated-1x"
+    df.loc["mask_q19", "info_regrouped"] = "Footway_path_designated"
+
+    # q20
+    mask_q20 = (
+        (
+            (df["oneway"].isnull() | ~df["oneway"].isin(["yes", "-1"]))
+            & (
+                df["oneway:bicycle"].isnull()
+                | ~df["oneway:bicycle"].isin(["yes", "-1"])
+            )
+        )
+        & (
+            (
+                (df["highway"] == "footway")
+                & (df["footway"].isnull() | ~df["footway"].isin(["sidewalk"]))
+                & (df["bicycle"].isin(["designated", "official"]))
+            )
+            | (
+                (df["highway"] == "path")
+                & (df["bicycle"].isin(["designated", "official"]))
+                & (df["foot"].isnull() | ~df["foot"].isin(["designated"]))
+            )
+        )
+        & (
+            (
+                (
+                    df["surface"].isin(
+                        [
+                            "paved",
+                            "asphalt",
+                            "concrete",
+                            "concrete:plates",
+                            "concrete:lanes",
+                            "paving_stones",
+                            "sett",
+                            "unhewn_cobblestone",
+                            "cobblestone",
+                            "metal",
+                            "wood",
+                            "unpaved",
+                            "compacted",
+                            "fine_gravel",
+                            "gravel",
+                            "pebblestone",
+                            "ground",
+                            "tartan",
+                            "clay",
+                            "metal_grid",
+                        ]
+                    )
+                    | df["surface"].isnull()
+                )
+                & (
+                    df["smoothness"].isnull()
+                    | ~df["smoothness"].isin(
+                        ["bad", "very_bad", "horrible", "very_horrible", "impassable"]
+                    )
+                )
+                & (
+                    df["tracktype"].isnull()
+                    | ~df["tracktype"].isin(["grade3", "grade4", "grade5"])
+                )
+            )
+        )
+    )
+
+    df.loc["mask_q20", "info"] = "Footway_path_designated-2x"
+    df.loc["mask_q20", "info_regrouped"] = "Footway_path_designated"
+
+    # q21
+    mask_q21 = (
+        (df["maxspeed"] == "30")
+        & ((df["maxspeed:type"].isnull() | (df["maxspeed:type"] != "CH:zone30")))
+        & (df["oneway"].isin(["yes", "-1"]))
+    )
+
+    df.loc["mask_q21", "info"] = "Limite_a_30-1x"
+    df.loc["mask_q21", "info_regrouped"] = "Limite_a_30"
+
+    # q22
+    mask_q22 = (
+        (df["maxspeed"] == "30")
+        & ((df["maxspeed:type"].isnull() | (df["maxspeed:type"] != "CH:zone30")))
+        & (df["oneway"].isnull() | (df["oneway"] == "no"))
+    )
+
+    df.loc["mask_q22", "info"] = "Limite_a_30-2x"
+    df.loc["mask_q22", "info_regrouped"] = "Limite_a_30"
+
+    # q23
+    mask_q23 = (
+        (df["highway"] == "pedestrian")
+        & (df["oneway"].isin(["yes", "-1"]))
+        & (df["bicycle"].isnull() | (df["bicycle"] != "no"))
+    )
+
+    df.loc["mask_q23", "info"] = "Pedestrian_1x"
+    df.loc["mask_q23", "info_regrouped"] = "Pedestrian"
+
+    # q24
+    mask_q24 = (
+        (df["highway"] == "pedestrian")
+        & (df["oneway"].isnull() | (df["oneway"] == "no"))
+        & (df["bicycle"].isnull() | (df["bicycle"] != "no"))
+    )
+
+    df.loc["mask_q24", "info"] = "Pedestrian_2x"
+    df.loc["mask_q24", "info_regrouped"] = "Pedestrian"
+
+    # q25
+    mask_q25 = ((df["oneway"] == "yes") & (df["highway"] == "cycleway")) | (
+        (
+            (df["cycleway:right"] == "track")
+            & (
+                df["cycleway:left"].isnull()
+                | ~df["cycleway:left"].isin(["track", "opposite_track"])
+            )
+        )
+        | (
+            (df["oneway"] == "yes")
+            & ((df["cycleway"] == "track") | (df["cycleway:right"] == "track"))
+        )
+        | (
+            (df["oneway"] == "-1")
+            & (df["cycleway:right"] == "track")
+            & (df["oneway:bicycle"].isnull() | (df["oneway:bicycle"] != "no"))
+        )
+    )
+
+    df.loc["mask_q25", "info"] = "Pistes_cyclables-1xD"
+    df.loc["mask_q25", "info_regrouped"] = "Pistes_cyclables"
+
+    # q26
+    mask_q26 = (
+        ((df["cycleway"] == "track") & (df["oneway"] == "-1"))
+        | (
+            (df["oneway"].isnull() | ~df["oneway"].isin(["yes", "-1"]))
+            & (
+                (df["cycleway:left"] == "track")
+                & (df["cycleway:right"].isnull() | (df["cycleway:right"] != "track"))
+            )
+        )
+        | (
+            (df["oneway"] == "yes")
+            & (
+                (df["cycleway:left"] == "track")
+                & (df["oneway:bicycle"].isnull() | (df["oneway:bicycle"] != "no"))
+            )
+        )
+        | (
+            (df["oneway"] == "-1")
+            & ((df["cycleway:left"] == "track") | (df["cycleway"] == "track"))
+        )
+    )
+
+    df.loc["mask_q26", "info"] = "Pistes_cyclables-1xG"
+    df.loc["mask_q26", "info_regrouped"] = "Pistes_cyclables"
+
+    # q27
+    mask_q27 = (df["oneway"].isnull() | ~df["oneway"].isin(["yes", "-1"])) & (
+        (df["highway"] == "cycleway")
+        | (
+            (df["cycleway"].isin(["track", "opposite_track"]))
+            | (df["cycleway:both"].isin(["track", "opposite_track"]))
+            | (
+                (df["cycleway:left"].isin(["track", "opposite_track"]))
+                & (df["cycleway:right"].isin(["track", "opposite_track"]))
+            )
+        )
+    )
+
+    df.loc["mask_q27", "info"] = "Pistes_cyclables-2x"
+    df.loc["mask_q27", "info_regrouped"] = "Pistes_cyclables"
+
+    # q28
+    mask_q28 = df["cycleway:right"].isin(["track", "opposite_track"])
+
+    df.loc["mask_q28", "info"] = "Pistes_cyclables-2xD"
+    df.loc["mask_q28", "info_regrouped"] = "Pistes_cyclables"
+
+    # q29
+    mask_q29 = df["cycleway:left"].isin(["track", "opposite_track"])
+
+    df.loc["mask_q29", "info"] = "Pistes_cyclables-2xG"
+    df.loc["mask_q29", "info_regrouped"] = "Pistes_cyclables"
+
+    # q30
+    mask_q30 = (
+        (df["segregated"] == "yes")
+        & (df["highway"] == "footway")
+        & (df["footway"] == "sidewalk")
+        & (df["bicycle"] != "no")
+        & (
+            (df["oneway"].isin(["yes", "-1"]))
+            | (df["oneway:bicycle"].isin(["yes", "-1"]))
+        )
+    )
+    df.loc["mask_q30", "info"] = "Pistes_sur_Trottoirs-1x"
+    df.loc["mask_q30", "info_regrouped"] = "Pistes_sur_Trottoirs"
+
+    # q31
+    mask_q31 = (
+        (df["segregated"] == "yes")
+        & (df["highway"] == "footway")
+        & (df["footway"] == "sidewalk")
+        & (df["bicycle"].isin(["yes", "designated", "official"]))
+        & (df["oneway"] == "yes")
+    ) | (
+        (df["sidewalk"].isin(["right", "both"]))
+        & (df["sidewalk:right:bicycle"].isin(["yes", "designated", "official"]))
+        & (
+            (df["sidewalk:left:bicycle"].isnull())
+            | (df["sidewalk:left:bicycle"] == "no")
+        )
+    )
+
+    df.loc["mask_q31", "info"] = "Pistes_sur_Trottoirs-1xD"
+    df.loc["mask_q31", "info_regrouped"] = "Pistes_sur_Trottoirs"
+
+    # q32
+    mask_q32 = (
+        (df["segregated"] == "yes")
+        & (df["highway"] == "footway")
+        & (df["footway"] == "sidewalk")
+        & (df["bicycle"].isin(["yes", "designated", "official"]))
+        & (df["oneway"] == "-1")
+    ) | (
+        (df["sidewalk"].isin(["left", "both"]))
+        & (df["sidewalk:left:bicycle"].isin(["yes", "designated", "official"]))
+        & (
+            (df["sidewalk:right:bicycle"].isnull())
+            | (df["sidewalk:right:bicycle"] == "no")
+        )
+    )
+
+    df.loc["mask_q32", "info"] = "Pistes_sur_Trottoirs-1xG"
+    df.loc["mask_q32", "info_regrouped"] = "Pistes_sur_Trottoirs"
+
+    # q33
+    mask_q33 = (
+        (df["segregated"] == "yes")
+        & (df["highway"] == "footway")
+        & (df["footway"] == "sidewalk")
+        & (df["bicycle"].isin(["yes", "designated", "official"]))
+        & (
+            (df["oneway"].isnull() | (df["oneway"] == "no"))
+            & (df["oneway:bicycle"].isnull() | (df["oneway:bicycle"] == "no"))
+        )
+    ) | (
+        (df["sidewalk"] == "both")
+        & (
+            (
+                (df["sidewalk:right:bicycle"].isin(["yes", "designated", "official"]))
+                & (df["sidewalk:left:bicycle"].isin(["yes", "designated", "official"]))
+            )
+        )
+    )
+    df.loc["mask_q33", "info"] = "Pistes_sur_Trottoirs-2x"
+    df.loc["mask_q33", "info_regrouped"] = "Pistes_sur_Trottoirs"
+
+    # q34
+    mask_q34 = (
+        (
+            df["highway"].isin(
+                [
+                    "track",
+                    "service",
+                    "unclasified",
+                    "residential",
+                    "tertiary",
+                    "secondary",
+                    "primary",
+                ]
+            )
+        )
+        & (
+            (
+                (
+                    df["surface"].isin(
+                        [
+                            "paved",
+                            "asphalt",
+                            "concrete",
+                            "concrete:plates",
+                            "concrete:lanes",
+                            "paving_stones",
+                            "sett",
+                            "unhewn_cobblestone",
+                            "cobblestone",
+                            "metal",
+                            "wood",
+                            "unpaved",
+                            "compacted",
+                            "fine_gravel",
+                            "gravel",
+                            "pebblestone",
+                            "ground",
+                            "tartan",
+                            "clay",
+                            "metal_grid",
+                        ]
+                    )
+                )
+                | df["surface"].isnull()
+            )
+            & (
+                df["smoothness"].isnull()
+                | ~df["smoothness"].isin(
+                    ["bad", "very_bad", "horrible", "very_horrible", "impassable"]
+                )
+            )
+            & (
+                df["tracktype"].isnull()
+                | ~df["tracktype"].isin(["grade3", "grade4", "grade5"])
+            )
+        )
+        & (
+            (df["highway"] != "track")
+            | df[["surface", "smoothness", "tracktype"]].notnull().any(axis=1)
+        )
+        & (
+            (df["psv"].isnull() | (df["psv"] == "no"))
+            & (df["motorcycle"].isnull() | (df["motorcycle"] == "no"))
+            & (df["bus"].isnull() | (df["bus"] == "no"))
+        )
+        & (
+            (
+                (
+                    df["motor_vehicle"].isin(["no", "forestry", "agricultural"])
+                    | df["motorcar"].isin(["no", "forestry", "agricultural"])
+                )
+                & (df["bicycle"].isnull() | (df["bicycle"] != "no"))
+            )
+            | (
+                (df["access"].isin(["no", "forestry", "agricultural"]))
+                & (df["bicycle"].isin(["yes", "designated"]))
+                & (df["motor_vehicle"].isnull() | (df["motor_vehicle"] == "no"))
+            )
+        )
+        & (
+            df["oneway"].isin(["yes", "-1"])
+            & (df["oneway:bicycle"].isnull() | df["oneway:bicycle"].isin(["yes", "-1"]))
+        )
+    )
+    df.loc["mask_q34", "info"] = "Routes_services_chemins_agricoles-1x"
+    df.loc["mask_q34", "info_regrouped"] = "Routes_services_chemins_agricoles"
+
+    # q35
+    mask_q35 = (
+        (
+            df["highway"].isin(
+                [
+                    "track",
+                    "service",
+                    "unclasified",
+                    "residential",
+                    "tertiary",
+                    "secondary",
+                    "primary",
+                ]
+            )
+        )
+        & (
+            (
+                (
+                    df["surface"].isin(
+                        [
+                            "paved",
+                            "asphalt",
+                            "concrete",
+                            "concrete:plates",
+                            "concrete:lanes",
+                            "paving_stones",
+                            "sett",
+                            "unhewn_cobblestone",
+                            "cobblestone",
+                            "metal",
+                            "wood",
+                            "unpaved",
+                            "compacted",
+                            "fine_gravel",
+                            "gravel",
+                            "pebblestone",
+                            "ground",
+                            "tartan",
+                            "clay",
+                            "metal_grid",
+                        ]
+                    )
+                )
+                | df["surface"].isnull()
+            )
+            & (
+                df["smoothness"].isnull()
+                | ~df["smoothness"].isin(
+                    ["bad", "very_bad", "horrible", "very_horrible", "impassable"]
+                )
+            )
+            & (
+                df["tracktype"].isnull()
+                | ~df["tracktype"].isin(["grade3", "grade4", "grade5"])
+            )
+        )
+        & (
+            (df["highway"] != "track")
+            | df[["surface", "smoothness", "tracktype"]].notnull().any(axis=1)
+        )
+        & (
+            (df["psv"].isnull() | (df["psv"] == "no"))
+            & (df["motorcycle"].isnull() | (df["motorcycle"] == "no"))
+            & (df["bus"].isnull() | (df["bus"] == "no"))
+        )
+        & (
+            (
+                (
+                    df["motor_vehicle"].isin(["no", "forestry", "agricultural"])
+                    | df["motorcar"].isin(["no", "forestry", "agricultural"])
+                )
+                & (df["bicycle"].isnull() | (df["bicycle"] != "no"))
+            )
+            | (
+                (
+                    df["access"].isin(["no", "forestry", "agricultural"])
+                    & (df["bicycle"].isin(["yes", "designated"]))
+                )
+                & (df["motor_vehicle"].isnull() | (df["motor_vehicle"] == "no"))
+            )
+        )
+        & (df["oneway"].isnull() | ~df["oneway"].isin(["yes", "-1"]))
+        & (df["oneway:bicycle"].isnull() | ~df["oneway:bicycle"].isin(["yes", "-1"]))
+    )
+
+    df.loc["mask_q35", "info"] = "Routes_services_chemins_agricoles-2x"
+    df.loc["mask_q35", "info_regrouped"] = "Routes_services_chemins_agricoles"
+
+    # q36
+    mask_q36 = (
+        (df["segregated"].isnull() | (df["segregated"] != "yes"))
+        & (df["highway"] == "footway")
+        & (df["footway"] == "sidewalk")
+        & (df["bicycle"] != "no")
+        & (
+            (df["oneway"].isin(["yes", "-1"]))
+            | (df["oneway:bicycle"].isin(["yes", "-1"]))
+        )
+    )
+    df.loc["mask_q36", "info"] = "Trottoirs_cyclables-1x"
+    df.loc["mask_q36", "info_regrouped"] = "Trottoirs_cyclables"
+
+    # q37
+    mask_q37 = (
+        (df["segregated"].isnull() | (df["segregated"] != "yes"))
+        & (df["highway"] == "footway")
+        & (df["footway"] == "sidewalk")
+        & (df["bicycle"].isin(["yes", "designated", "official"]))
+        & (df["oneway"] == "yes")
+    ) | (
+        (df["sidewalk"].isin(["right", "both"]))
+        & (df["sidewalk:right:bicycle"].isin(["yes", "designated", "official"]))
+        & (
+            (df["sidewalk:left:bicycle"].isnull())
+            | (df["sidewalk:left:bicycle"] == "no")
+        )
+    )
+
+    df.loc["mask_q37", "info"] = "Trottoirs_cyclables-1xD"
+    df.loc["mask_q37", "info_regrouped"] = "Trottoirs_cyclables"
+
+    # q38
+    mask_q38 = (
+        (df["segregated"].isnull() | (df["segregated"] != "yes"))
+        & (df["highway"] == "footway")
+        & (df["footway"] == "sidewalk")
+        & (df["bicycle"].isin(["yes", "designated", "official"]))
+        & (df["oneway"] == "-1")
+    ) | (
+        (df["sidewalk"].isin(["left", "both"]))
+        & (df["sidewalk:left:bicycle"].isin(["yes", "designated", "official"]))
+        & (
+            (df["sidewalk:right:bicycle"].isnull())
+            | (df["sidewalk:right:bicycle"] == "no")
+        )
+    )
+    df.loc["mask_q38", "info"] = "Trottoirs_cyclables-1xG"
+    df.loc["mask_q38", "info_regrouped"] = "Trottoirs_cyclables"
+
+    # q39
+    mask_q39 = (
+        (df["segregated"].isnull() | (df["segregated"] != "yes"))
+        & (df["highway"] == "footway")
+        & (df["footway"] == "sidewalk")
+        & (df["bicycle"].isin(["yes", "designated", "official"]))
+        & (
+            (df["oneway"].isnull() | (df["oneway"] == "no"))
+            & (df["oneway:bicycle"].isnull() | (df["oneway:bicycle"] == "no"))
+        )
+    ) | (
+        (df["sidewalk"] == "both")
+        & (
+            (
+                (df["sidewalk:right:bicycle"].isin(["yes", "designated", "official"]))
+                & (df["sidewalk:left:bicycle"].isin(["yes", "designated", "official"]))
+            )
+        )
+    )
+
+    df.loc["mask_q39", "info"] = "Trottoirs_cyclables-2x"
+    df.loc["mask_q39", "info_regrouped"] = "Trottoirs_cyclables"
+
+    # q40
+
+    mask_q40 = (
+        (
+            (df["oneway"] == "yes")
+            & (
+                (
+                    (df["highway"] == "service")
+                    & (df["psv"].isin(["yes"]))
+                    & (df["access"] == "no")
+                    & (df["bicycle"].notnull() & (df["bicycle"] != "no"))
+                )
+                | (
+                    (df["cycleway"] == "share_busway")
+                    & (
+                        df["busway"].notnull()
+                        & (df["busway"] != "no")
+                        & (df["busway"] != "opposite_lane")
+                    )
+                )
+                | (
+                    (df["highway"] == "bus_guideway")
+                    & (
+                        (df["bicycle"].notnull() & (df["bicycle"] != "no"))
+                        | (df["cycleway"] == "share_busway")
+                    )
+                )
+            )
+        )
+        | (
+            (df["oneway"] == "-1")
+            & (
+                (df["cycleway"].isin(["share_busway", "opposite_share_busway"]))
+                & (df["busway"] == "opposite_lane")
+            )
+        )
+        | (
+            (df["cycleway"] == "share_busway")
+            & (
+                (df["busway:right"].notnull() & (df["busway:right"] != "no"))
+                & (df["busway:left"].isnull() | (df["busway:left"] == "no"))
+            )
+        )
+        | (
+            (df["cycleway:right"].isin(["share_busway", "opposite_share_busway"]))
+            & (
+                df["cycleway:left"].isnull()
+                | ~df["cycleway:left"].isin(["share_busway", "opposite_share_busway"])
+            )
+        )
+    )
+    df.loc["mask_q40", "info"] = "Voies_bus-1xD"
+    df.loc["mask_q40", "info_regrouped"] = "Voies_bus"
+
+    # q41
+    mask_q41 = (
+        (
+            # A - Les cas où la voie est à sens unique
+            (df["oneway"] == "-1")
+            & (
+                (
+                    # A1 - Soit il s'agit de voies de bus indépendantes
+                    (df["highway"] == "service")
+                    & (df["psv"].isin(["yes"]) | df["bus"].isin(["yes"]))
+                    & ((df["access"] == "no") | (df["motor_vehicle"] == "no"))
+                    & (
+                        (df["bicycle"].notnull() & (df["bicycle"] != "no"))
+                        | (df["cycleway"] == "share_busway")
+                    )
+                )
+                | (
+                    # A2 - Soit des voies de bus rattachées à une route en sens unique
+                    (df["cycleway"] == "share_busway")
+                    & (df["busway"].notnull() & (df["busway"] != "no"))
+                )
+            )
+        )
+        | (
+            # Soit il s'agit de voies de bus guidée ouverte aux vélos
+            (df["highway"] == "bus_guideway")
+            & (
+                (df["bicycle"].notnull() & (df["bicycle"] != "no"))
+                | (df["cycleway"] == "share_busway")
+                | (df["cycleway:left"] == "share_busway")
+            )
+        )
+        | (
+            # Une voie à sens unique
+            (df["oneway"] == "yes")
+            & (
+                (df["cycleway"].isin(["share_busway", "opposite_share_busway"]))
+                & (df["busway"] == "opposite_lane")
+            )
+        )
+        | (
+            # B1 - Le côté est signalé uniquement sur le tag busway
+            (df["cycleway"] == "share_busway")
+            & (
+                (df["busway:left"].notnull() & (df["busway:left"] != "no"))
+                & ((df["busway:right"].isnull()) | (df["busway:right"] == "no"))
+            )
+        )
+        | (
+            # B2 - Le côté est signalé sur le tag cycleway
+            (df["cycleway:left"].isin(["share_busway", "opposite_share_busway"]))
+            & (
+                (df["cycleway:right"].isnull())
+                | ~df["cycleway:right"].isin(["share_busway", "opposite_share_busway"])
+            )
+        )
+    )
+
+    df.loc["mask_q41", "info"] = "Voies_bus-1xG"
+    df.loc["mask_q41", "info_regrouped"] = "Voies_bus"
+
+    # q42
+    mask_q42 = (
+        # Cas 1 : Rue à sens unique avec voies vélo spécifiées
+        df["oneway"].isin(["yes", "-1"])
+        & (
+            (
+                (df["cycleway:right"].isin(["share_busway", "opposite_share_busway"]))
+                & (df["cycleway:left"].isin(["share_busway", "opposite_share_busway"]))
+            )
+            | (df["cycleway"].isin(["share_busway", "opposite_share_busway"]))
+        )
+        & (df["busway:right"].notnull() & (df["busway:right"] != "no"))
+        & (df["busway:left"].notnull() & (df["busway:left"] != "no"))
+    ) | (
+        # Cas 2 : Route non à sens unique
+        (df["oneway"].isnull() | ~df["oneway"].isin(["yes", "-1"]))
+        & (
+            # A1 : Vélos ont accès à la voie bus
+            (
+                df["cycleway"].isin(["share_busway"])
+                & (
+                    (df["busway"] != "no")
+                    | ((df["busway:right"] != "no") & (df["busway:left"] != "no"))
+                )
+            )  # A2 : Les deux voies vélo sont spécifiées
+            | (
+                (df["cycleway:right"].isin(["share_busway"]))
+                & (df["cycleway:left"].isin(["share_busway"]))
+                & (df["busway:right"].notnull() & (df["busway:right"] != "no"))
+                & (df["busway:left"].notnull() & (df["busway:left"] != "no"))
+            )  # B : Bus empruntent des voies indépendantes accessibles aux vélos
+            | (
+                (df["highway"] == "service")
+                & (df["oneway"].isnull() | ~df["oneway"].isin(["yes", "-1"]))
+                & (
+                    (df["psv"].notnull() & (df["psv"] != "no"))
+                    | (df["bus"].notnull() & (df["bus"] != "no"))
+                )
+                & ((df["access"] == "no") | (df["motor_vehicle"] == "no"))
+                & (
+                    (df["bicycle"].notnull() & (df["bicycle"] != "no"))
+                    | (df["cycleway"] == "share_busway")
+                    | (
+                        (df["cycleway:right"] == "share_busway")
+                        & (df["cycleway:left"] == "share_busway")
+                    )
+                )
+            )  # Cas des bus guideway
+            | (
+                (df["highway"] == "bus_guideway")
+                & (
+                    (df["bicycle"].notnull() & (df["bicycle"] != "no"))
+                    | (df["cycleway"] == "share_busway")
+                    | (
+                        (df["cycleway:right"] == "share_busway")
+                        & (df["cycleway:left"] == "share_busway")
+                    )
+                )
+            )
+        )
+    )
+
+    df.loc["mask_q42", "info"] = "Voies_bus-2x"
+    df.loc["mask_q42", "info_regrouped"] = "Voies_bus"
+
+    # q43
+    mask_q43 = (
+        df["oneway"].isin(["yes", "-1"]) | df["oneway:bicycle"].isin(["yes", "-1"])
+    ) & (
+        (df["highway"] == "path")
+        & (df["bicycle"] == "designated")
+        & (df["foot"] == "designated")
+    )
+    df.loc["mask_q43", "info"] = "Voies_vertes-1x"
+    df.loc["mask_q43", "info_regrouped"] = "Voies_vertes"
+
+    # q44
+    mask_q44 = (
+        (df["oneway"].isnull() | (df["oneway"] == "no"))
+        & (df["oneway:bicycle"].isnull() | (df["oneway:bicycle"] == "no"))
+    ) & (
+        (df["highway"] == "path")
+        & (df["bicycle"] == "designated")
+        & (df["foot"] == "designated")
+    )
+    df.loc["mask_q44", "info"] = "Voies_vertes-2x"
+    df.loc["mask_q44", "info_regrouped"] = "Voies_vertes"
+
+    # q45
+    mask_q45 = (
+        (df["maxspeed"] == "30")
+        & ((df["maxspeed:type"] != "CH:zone30"))
+        & (df["oneway"].isin(["yes", "-1"]))
+        & (df["bicycle"].isnull() | (df["bicycle"] != "no"))
+    )
+    df.loc["mask_q45", "info"] = "Zones_30-1x"
+    df.loc["mask_q45", "info_regrouped"] = "Zones_30"
+
+    # q46
+    mask_q46 = (
+        (df["maxspeed"] == "30")
+        & ((df["maxspeed:type"] != "CH:zone30"))
+        &
+        # Condition 3 : "oneway" est NULL ou 'no'
+        (df["oneway"].isnull() | (df["oneway"] == "no"))
+        &
+        # Condition 4 : "bicycle" est NULL ou n'est pas 'no'
+        (df["bicycle"].isnull() | (df["bicycle"] != "no"))
+    )
+    df.loc["mask_q46", "info"] = "Zones_30-2x"
+    df.loc["mask_q46", "info_regrouped"] = "Zones_30"
+
+    # q47
+    mask_q47 = (
+        # Condition 1 : "oneway" est 'yes' ou '-1'
+        (df["oneway"].isin(["yes", "-1"]))
+        &
+        # Condition 2 : soit "highway" est 'living_street', soit des tags spécifiques sont définis
+        (
+            (df["highway"] == "living_street")
+            | (
+                # "maxspeed" est '20' et "zone:maxspeed" ou "source:maxspeed" contient 'FR:20' ou 'FR:zone20'
+                (df["maxspeed"] == "20")
+                & ((df["maxspeed:type"] == "CH:zone20"))
+            )
+        )
+    )
+    df.loc["mask_q47", "info"] = "Zones_rencontre-1x"
+    df.loc["mask_q47", "info_regrouped"] = "Zones_rencontre"
+
+    # q48
+    mask_q48 = (
+        # Condition 1 : La voie est à double sens
+        (df["oneway"].isnull() | (df["oneway"] == "no"))
+        &
+        # Condition 2 : Soit la voie est de type 'living_street', soit certaines conditions sont remplies
+        (
+            (df["highway"] == "living_street")
+            | (
+                # "maxspeed" est '20' et "zone:maxspeed" ou "source:maxspeed" contient 'FR:20' ou 'FR:zone20'
+                (df["maxspeed"] == "20")
+                & (df["maxspeed:type"] == "CH:zone20")
+            )
+        )
+    )
+    df.loc["mask_q48", "info"] = "Zones_rencontre-2x"
+    df.loc["mask_q48", "info_regrouped"] = "Zones_rencontre"
+
+    # q49
+    mask_q49 = (
+        # Condition 1 : Une route explicitement à double sens
+        (
+            (df["oneway"].isnull() | (df["oneway"] == "no"))
+            & (
+                df["junction"].isnull()
+                | ~df["junction"].isin(["roundabout", "circular"])
+            )
+        )
+        &
+        # Condition 2 : Soit une bande cyclable classique ou des bandes cyclables des deux côtés
+        (
+            (df["cycleway"] == "lane")
+            | ((df["cycleway:right"] == "lane") & (df["cycleway:left"] == "lane"))
+            | (df["cycleway:both"] == "lane")
+        )
+        &
+        # Condition 3 : La route ne comporte qu'une seule voie
+        (df["lanes"] == "1")
+    )
+    df.loc["mask_q49", "info"] = "chaucidou"
+    df.loc["mask_q49", "info_regrouped"] = "chaucidou"
+
+    # q50
+    mask_q50 = (
+        # Condition 1 : La voie est un escalier
+        (df["highway"] == "steps")
+        &
+        # Condition 2 : Avec une goulotte pour vélos à droite
+        (df["ramp:bicycle"] == "yes")
+    )
+    df.loc["mask_q50", "info"] = "escalier"
+    df.loc["mask_q50", "info_regrouped"] = "escalier"
+
+    # q53
+    mask_q51 = (
+        # Condition 1 : La voie est à sens unique pour les voitures ou les vélos
+        (df["oneway"].isin(["yes", "-1"]) | df["oneway:bicycle"].isin(["yes", "-1"]))
+        &
+        # Condition 2 : Cas des footways ou paths tolérés aux vélos
+        (
+            (
+                (df["highway"] == "footway")
+                & (df["footway"].isnull() | ~df["footway"].isin(["sidewalk"]))
+                & (df["bicycle"] == "permissive")
+            )
+            | ((df["highway"] == "path") & (df["bicycle"] == "permissive"))
+        )
+        &
+        # Condition 3 : Revêtement circulable ou inconnu
+        (
+            (
+                (
+                    df["surface"].isin(
+                        [
+                            "paved",
+                            "asphalt",
+                            "concrete",
+                            "concrete:plates",
+                            "concrete:lanes",
+                            "paving_stones",
+                            "sett",
+                            "unhewn_cobblestone",
+                            "cobblestone",
+                            "metal",
+                            "wood",
+                            "unpaved",
+                            "compacted",
+                            "fine_gravel",
+                            "gravel",
+                            "pebblestone",
+                            "ground",
+                            "tartan",
+                            "clay",
+                            "metal_grid",
+                        ]
+                    )
+                    | df["surface"].isnull()
+                )
+                & (
+                    df["smoothness"].isnull()
+                    | ~df["smoothness"].isin(
+                        ["bad", "very_bad", "horrible", "very_horrible", "impassable"]
+                    )
+                )
+                & (
+                    df["tracktype"].isnull()
+                    | ~df["tracktype"].isin(["grade3", "grade4", "grade5"])
+                )
+            )
+        )
+    )
+    df.loc["mask_q51", "info"] = "footway_permissive-1x"
+    df.loc["mask_q51", "info_regrouped"] = "footway_permissive"
+
+    # q54
+    mask_q52 = (
+        # Condition 1 : La voie n'est pas à sens unique pour les voitures ou les vélos
+        (df["oneway"].isnull() | ~df["oneway"].isin(["yes", "-1"]))
+        & (df["oneway:bicycle"].isnull() | ~df["oneway:bicycle"].isin(["yes", "-1"]))
+        &
+        # Condition 2 : Cas des footways ou paths tolérés aux vélos
+        (
+            (
+                (df["highway"] == "footway")
+                & (df["footway"].isnull() | ~df["footway"].isin(["sidewalk"]))
+                & (df["bicycle"] == "permissive")
+            )
+            | ((df["highway"] == "path") & (df["bicycle"] == "permissive"))
+        )
+        &
+        # Condition 3 : Revêtement circulable ou inconnu
+        (
+            (
+                (
+                    df["surface"].isin(
+                        [
+                            "paved",
+                            "asphalt",
+                            "concrete",
+                            "concrete:plates",
+                            "concrete:lanes",
+                            "paving_stones",
+                            "sett",
+                            "unhewn_cobblestone",
+                            "cobblestone",
+                            "metal",
+                            "wood",
+                            "unpaved",
+                            "compacted",
+                            "fine_gravel",
+                            "gravel",
+                            "pebblestone",
+                            "ground",
+                            "tartan",
+                            "clay",
+                            "metal_grid",
+                        ]
+                    )
+                    | df["surface"].isnull()
+                )
+                & (
+                    df["smoothness"].isnull()
+                    | ~df["smoothness"].isin(
+                        ["bad", "very_bad", "horrible", "very_horrible", "impassable"]
+                    )
+                )
+                & (
+                    df["tracktype"].isnull()
+                    | ~df["tracktype"].isin(["grade3", "grade4", "grade5"])
+                )
+            )
+        )
+    )
+    df.loc["mask_q52", "info"] = "footway_permissive-2x"
+    df.loc["mask_q52", "info_regrouped"] = "footway_permissive"
+
+    return df

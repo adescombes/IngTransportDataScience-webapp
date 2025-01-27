@@ -1,14 +1,17 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 
 import geopandas as gpd
 import osmnx as ox
 from osmnx._errors import InsufficientResponseError
 from pandasql import sqldf
+import pandas as pd
+import os
 from shapely.geometry import Polygon, box
 
 from scripts.geovelo_sql_queries import queries
 from scripts.helpers import *
+
 
 app = Flask(__name__, static_folder="static", static_url_path="")
 
@@ -42,42 +45,17 @@ def process_rectangle():
 
     # Extraire les données OSM
     try:
-        # tags = {"highway": True}  # Exemple de tags génériques
         osm_data = ox.features.features_from_polygon(polygon, tags_of_interest)
 
-        # queries geovelo
         line = osm_data.loc[["way"]].reset_index()
         line = line[
             line.geometry.geom_type == "LineString"
         ].reset_index()  # only the line geometries
 
-        line.crs = "EPSG:4326"
-        line = line.to_crs(2056)
-        line["length_line"] = line.length
-        line.set_index("osmid", inplace=True)
-
-        sql_df = line.drop("geometry", axis=1)
-        try:
-            sql_df.drop(columns="FIXME", inplace=True)
-        except:
-            print("FIXME column not found")
-
-        q = "SELECT * FROM sql_df"
-        pysqldf = lambda q: sqldf(q, globals())
-        osmid_bike_type = [
-            pysqldf("""SELECT osmid FROM sql_df WHERE """ + q).osmid for q in queries
-        ]
-        line_gpd_clipped = organise_df_with_SQLqueries(osmid_bike_type, line)
-
-        osm_data_gpd = gpd.GeoDataFrame(
-            line_gpd_clipped, geometry=line_gpd_clipped.geometry
-        ).fillna("NaN")
-
-        osm_data_gpd.set_geometry("geometry")
 
         # fin des queries geovelo -> couche geojson
 
-        geojson_data = osm_data_gpd.to_crs("EPSG:4326").to_json()
+        geojson_data = line.to_crs("EPSG:4326").to_json()
         app.logger.debug("Données GeoJSON générées")
 
         return jsonify({"geojson": geojson_data})
@@ -87,6 +65,25 @@ def process_rectangle():
         return jsonify(
             {"geojson": None, "message": "No data found in the selected area."}
         )
+
+
+@app.route("/download-csv", methods=["POST"])
+def download_csv():
+    data = request.get_json()
+    geojson_data = data.get("geojson")
+
+    if not geojson_data:
+        return jsonify({"message": "No GeoJSON data provided."}), 400
+
+    # Convertir le GeoJSON en GeoDataFrame
+    gdf = gpd.GeoDataFrame.from_features(geojson_data["features"])
+
+    # Créer un fichier CSV temporaire
+    csv_path = "osm_data.csv"
+    gdf.to_csv(csv_path, index=False)
+
+    # Envoyer le fichier CSV
+    return send_file(csv_path, as_attachment=True, download_name="osm_data.csv")
 
 
 if __name__ == "__main__":
