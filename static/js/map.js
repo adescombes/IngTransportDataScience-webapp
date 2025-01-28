@@ -11,6 +11,9 @@ L.tileLayer(mapboxUrl, {
     attribution: attr
 }).addTo(map);
 
+let currentGeoJSON = null; // Variable pour stocker les données GeoJSON
+
+
 // Ajout des outils de dessin
 var drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
@@ -72,20 +75,28 @@ document.getElementById('run-button').addEventListener('click', function (event)
         })
         .then((data) => {
             console.log("Réponse du backend :", data);
+
             if (data.geojson) {
-                // Mettre à jour currentGeoJSON avec les données reçues
+
                 currentGeoJSON = JSON.parse(data.geojson);
 
-                // Ajouter la couche GeoJSON à la carte
-                var geojsonLayer = L.geoJSON(currentGeoJSON, {
-                    style: {
-                        color: "blue",
-                        weight: 2,
-                        opacity: 0.8,
-                    },
+                // légende catégorisée selon "info_regrouped"
+                const categories = [...new Set(currentGeoJSON.features.map(f => f.properties.info_regrouped))];
+                addLegend(categories);
+    
+                const geojsonLayer = L.geoJSON(currentGeoJSON, {
+                    style: feature => ({
+                        color: getColor(feature.properties.info_regrouped),
+                        weight: 3,
+                        opacity: 1
+                    })
                 }).addTo(map);
+                
                 map.fitBounds(geojsonLayer.getBounds());
                 console.log('Les données sont affichées sur la carte.');
+                
+                plotHistogram(currentGeoJSON);
+
             } else {
                 console.error("Aucun GeoJSON retourné.");
                 alert("Aucune donnée disponible pour la zone sélectionnée.");
@@ -95,7 +106,7 @@ document.getElementById('run-button').addEventListener('click', function (event)
 });
 
 
-let currentGeoJSON = null; // Variable pour stocker les données GeoJSON
+
 
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -133,4 +144,122 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .catch(error => console.error("Erreur :", error));
     });
+});
+
+function addLegend(infoCategories) {
+    var legend = L.control({ position: "bottomright" });
+
+    legend.onAdd = function (map) {
+        var div = L.DomUtil.create("div", "info_regrouped legend");
+        div.innerHTML = "<h4>Légende</h4>";
+        infoCategories.forEach(category => {
+            // Ajoute une ligne colorée à côté de chaque catégorie
+            div.innerHTML += `
+                <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                    <div style="
+                        width: 30px; 
+                        height: 4px; 
+                        background-color: ${getColor(category)}; 
+                        margin-right: 10px;">
+                    </div>
+                    ${category}
+                </div>`;
+        });
+        return div;
+    };
+
+    legend.addTo(map);
+}
+
+
+// Fonction pour assigner des couleurs par catégorie
+function getColor(category) {
+    switch (category) {
+        case "Accotement cyclable":
+            return "#aacf76";
+        case "Autre chemin piéton autorisé aux vélos":
+            return "#588e0f";
+        case "Bande cyclable": 
+            return "#0ddbfa";
+        case "Cheminement cyclable":
+            return "#a713e7";
+        case "Double-sens cyclable":
+            return "#99ee22";
+        case "Chemin piéton":
+            return "#9a2328";
+        case "Limite à 30":
+            return "#0a4d00";
+        case "Piste cyclable":
+            return "#f05f84";
+        case "Piste sur trottoir":
+            return "#c0690d";
+        case "Route de service / chemin agricole":
+            return "#75a5b1";
+        case "Trottoir cyclable":
+            return "#3214c5";
+        case "Voie bus":
+            return "#12fed3";
+        case "Voie verte":
+            return "#c70f0d";
+        case "Zone 30":
+            return "#f27533";
+        case "Zone de rencontre":
+            return "#671f52";
+        case "chaucidou":
+            return "#8c2100";
+        case "escalier":
+            return "#da1155";
+        case "Chemin piéton":
+            return "#ea1278";
+        case "autres routes":
+            return "#000000"
+    };
+}
+
+
+// Histogramme
+
+function plotHistogram(data) {
+    // Extraire les catégories et calculer les sommes
+    const aggregated = data.features.reduce((acc, feature) => {
+        const info_regrouped = feature.properties.info_regrouped;
+        const length_prct = feature.properties.length_prct || 0;
+        acc[info_regrouped] = (acc[info_regrouped] || 0) + length_prct;
+        return acc;
+    }, {});
+
+    const categories = Object.keys(aggregated);
+    const values = Object.values(aggregated);
+
+    // Générer les couleurs pour chaque catégorie en utilisant `getColor`
+    const colors = categories.map(category => getColor(category));
+
+    const plotData = [{
+        x: values, // Valeurs sur l'axe X (longueurs)
+        y: categories, // Catégories sur l'axe Y
+        type: "bar",
+        orientation: "h", // Barres horizontales
+        marker: {
+            color: colors // Couleurs personnalisées
+        }
+    }];
+
+    const layout = {
+        title: "% linéaire des infrastructures cyclables",
+        xaxis: { title: "% linéaire" }, // Axe X montre les longueurs
+        yaxis: { title: "" } 
+    };
+
+    Plotly.newPlot("chart", plotData, layout);
+}
+
+// Téléchargement de l'histogramme en JPEG
+document.getElementById('download-barplot').addEventListener('click', function () {
+    Plotly.toImage(document.getElementById('chart'), { format: 'jpeg', width: 800, height: 600 })
+        .then(function (imageData) {
+            var link = document.createElement('a');
+            link.href = imageData;
+            link.download = 'chart.jpeg';
+            link.click();
+        });
 });

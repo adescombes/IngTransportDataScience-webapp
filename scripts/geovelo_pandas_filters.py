@@ -1235,166 +1235,166 @@ def geovelo_pandas_filters(df):
         )
     )
 
-    df["info"] = "0"
-    df["info_regrouped"] = "0"
+    df["info"] = "autres routes"
+    df["info_regrouped"] = "autres routes"
 
-    df.loc[mask_q1, 'info'] = "Accotements_cyclables-1xD"
-    df.loc[mask_q1, 'info_regrouped'] = "Accotements_cyclables"
+    df.loc[mask_q1, "info"] = "Accotement cyclable à droite"
+    df.loc[mask_q1, "info_regrouped"] = "Accotement cyclable"
 
-    df.loc[mask_q2, 'info'] = "Accotements_cyclables-1xG"
-    df.loc[mask_q2, 'info_regrouped'] = "Accotements_cyclables"
+    df.loc[mask_q2, "info"] = "Accotement cyclable à gauche"
+    df.loc[mask_q2, "info_regrouped"] = "Accotement cyclable"
 
-    df.loc[mask_q3, 'info'] = "Accotements_cyclables-2x"
-    df.loc[mask_q3, 'info_regrouped'] = "Accotements_cyclables"
-    
-    df.loc[mask_q4, 'info'] = "Autres_chemins_piéton_autorisé_aux_vélos-1x"
-    df.loc[mask_q4, 'info_regrouped'] = "Autres_chemins_piéton_autorisé_aux_vélos"
-    
-    df.loc[mask_q5, 'info'] = "Autres_chemins_piéton_autorisé_aux_vélos-2x"
-    df.loc[mask_q5, 'info_regrouped'] = "Autres_chemins_piéton_autorisé_aux_vélos"
-    
-    df.loc[mask_q6, 'info'] = "Bandes_cyclables-1xD"
-    df.loc[mask_q6, 'info_regrouped'] = "Bandes_cyclables"
-    
-    df.loc[mask_q7, 'info'] = "Bandes_cyclables-1xG"
-    df.loc[mask_q7, 'info_regrouped'] = "Bandes_cyclables"
-    
-    df.loc[mask_q8, 'info'] = "Bandes_cyclables-2x"
-    df.loc[mask_q8, 'info_regrouped'] = "Bandes_cyclables"
-    
-    df.loc[mask_q9, 'info'] = "Bandes_cyclables-2xD"
-    df.loc[mask_q9, 'info_regrouped'] = "Bandes_cyclables"
-    
-    df.loc[mask_q10, 'info'] = "Bandes_cyclables-2xG"
-    df.loc[mask_q10, 'info_regrouped'] = "Bandes_cyclables"
-    
-    df.loc[mask_q11, 'info'] = "Cheminements_cyclables-1xD"
-    df.loc[mask_q11, 'info_regrouped'] = "Cheminements_cyclables"
+    df.loc[mask_q3, "info"] = "Accotement cyclables des 2 côtés"
+    df.loc[mask_q3, "info_regrouped"] = "Accotement cyclable"
 
-    df.loc[mask_q12, 'info'] = "Cheminements_cyclables-1xG"
-    df.loc[mask_q12, 'info_regrouped'] = "Cheminements_cyclables"
+    df.loc[mask_q4, "info"] = "Autre chemin piéton autorisé aux vélos 1x"
+    df.loc[mask_q4, "info_regrouped"] = "Autre chemin piéton autorisé aux vélos"
 
-    df.loc[mask_q13, 'info'] = "Cheminements_cyclables-2x"
-    df.loc[mask_q13, 'info_regrouped'] = "Cheminements_cyclables"
+    df.loc[mask_q5, "info"] = "Autre chemin piéton autorisé aux vélos 2x"
+    df.loc[mask_q5, "info_regrouped"] = "Autre chemin piéton autorisé aux vélos"
 
-    df.loc[mask_q14, 'info'] = "Doubles-sens_cyclables_sans_bande"
-    df.loc[mask_q14, 'info_regrouped'] = "Double-sens_cyclables"
+    df.loc[mask_q6, "info"] = "Bande cyclable à droite"
+    df.loc[mask_q6, "info_regrouped"] = "Bande cyclable"
 
-    df.loc[mask_q15, 'info'] = "Doubles-sens_cyclables_en_bande-D"
-    df.loc[mask_q15, 'info_regrouped'] = "Double-sens_cyclables"
-    
-    df.loc[mask_q16, 'info'] = "Doubles-sens_cyclables_en_bande-G"
-    df.loc[mask_q16, 'info_regrouped'] = "Double-sens_cyclables"
+    df.loc[mask_q7, "info"] = "Bande cyclable à gauche"
+    df.loc[mask_q7, "info_regrouped"] = "Bande cyclable"
 
-    df.loc[mask_q17, 'info'] = "Doubles-sens_cyclables_piste-D"
-    df.loc[mask_q17, 'info_regrouped'] = "Double-sens_cyclables"
-    
-    df.loc[mask_q18, 'info'] = "Doubles-sens_cyclables_piste-G"
-    df.loc[mask_q18, 'info_regrouped'] = "Double-sens_cyclables"
+    df.loc[mask_q8, "info"] = "Bande cyclable des 2 côtés"
+    df.loc[mask_q8, "info_regrouped"] = "Bande cyclable"
 
-    df.loc[mask_q18, 'info'] = "Doubles-sens_cyclables_piste-G"
-    df.loc[mask_q18, 'info_regrouped'] = "Double-sens_cyclables"
+    df.loc[mask_q9, "info"] = "Bande cyclable à droite"
+    df.loc[mask_q9, "info_regrouped"] = "Bande cyclable"
 
-    df.loc[mask_q19, 'info'] = "Footway_path_designated-1x"
-    df.loc[mask_q19, 'info_regrouped'] = "Chemin piéton"
+    df.loc[mask_q10, "info"] = "Bande cyclable à gauche"
+    df.loc[mask_q10, "info_regrouped"] = "Bande cyclable"
 
-    df.loc[mask_q20, 'info'] = "Footway_path_designated-2x"
-    df.loc[mask_q20, 'info_regrouped'] = "Chemin piéton"
-    
-    df.loc[mask_q21, 'info'] = "Limite_a_30-1x"
-    df.loc[mask_q21, 'info_regrouped'] = "Limite_a_30"
+    df.loc[mask_q11, "info"] = "Cheminement cyclable à droite"
+    df.loc[mask_q11, "info_regrouped"] = "Cheminement cyclable"
 
-    df.loc[mask_q22, 'info'] = "Limite_a_30-2x"
-    df.loc[mask_q22, 'info_regrouped'] = "Limite_a_30"
+    df.loc[mask_q12, "info"] = "Cheminement cyclable à gauche"
+    df.loc[mask_q12, "info_regrouped"] = "Cheminement cyclable"
 
-    df.loc[mask_q23, 'info'] = "Pedestrian_1x"
-    df.loc[mask_q23, 'info_regrouped'] = "Chemin piéton"
+    df.loc[mask_q13, "info"] = "Cheminement cyclable des 2 côtés"
+    df.loc[mask_q13, "info_regrouped"] = "Cheminement cyclable"
 
-    df.loc[mask_q24, 'info'] = "Pedestrian_2x"
-    df.loc[mask_q24, 'info_regrouped'] = "Chemin piéton"
+    df.loc[mask_q14, "info"] = "Double-sens cyclable sans bande"
+    df.loc[mask_q14, "info_regrouped"] = "Double-sens cyclable"
 
-    df.loc[mask_q25, 'info'] = "Pistes_cyclables-1xD"
-    df.loc[mask_q25, 'info_regrouped'] = "Pistes_cyclables"
+    df.loc[mask_q15, "info"] = "Double-sens cyclable_en_bande à droite"
+    df.loc[mask_q15, "info_regrouped"] = "Double-sens cyclable"
 
-    df.loc[mask_q26, 'info'] = "Pistes_cyclables-1xG"
-    df.loc[mask_q26, 'info_regrouped'] = "Pistes_cyclables"
-    
-    df.loc[mask_q27, 'info'] = "Pistes_cyclables-2x"
-    df.loc[mask_q27, 'info_regrouped'] = "Pistes_cyclables"
-    
-    df.loc[mask_q28, 'info'] = "Pistes_cyclables-2xD"
-    df.loc[mask_q28, 'info_regrouped'] = "Pistes_cyclables"
-    
-    df.loc[mask_q29, 'info'] = "Pistes_cyclables-2xG"
-    df.loc[mask_q29, 'info_regrouped'] = "Pistes_cyclables"
-    
-    df.loc[mask_q30, 'info'] = "Pistes_sur_Trottoirs-1x"
-    df.loc[mask_q30, 'info_regrouped'] = "Pistes_sur_Trottoirs"
+    df.loc[mask_q16, "info"] = "Double-sens cyclable en bande à gauche"
+    df.loc[mask_q16, "info_regrouped"] = "Double-sens cyclable"
 
-    df.loc[mask_q31, 'info'] = "Pistes_sur_Trottoirs-1xD"
-    df.loc[mask_q31, 'info_regrouped'] = "Pistes_sur_Trottoirs"
-    
-    df.loc[mask_q32, 'info'] = "Pistes_sur_Trottoirs-1xG"
-    df.loc[mask_q32, 'info_regrouped'] = "Pistes_sur_Trottoirs"
-    
-    df.loc[mask_q33, 'info'] = "Pistes_sur_Trottoirs-2x"
-    df.loc[mask_q33, 'info_regrouped'] = "Pistes_sur_Trottoirs"
+    df.loc[mask_q17, "info"] = "Double-sens cyclable piste à droite"
+    df.loc[mask_q17, "info_regrouped"] = "Double-sens cyclable"
 
-    df.loc[mask_q34, 'info'] =  "Routes_services_chemins_agricoles-1x"
-    df.loc[mask_q34, 'info_regrouped'] = "Routes_services_chemins_agricoles"
+    df.loc[mask_q18, "info"] = "Double-sens cyclable piste à gauche"
+    df.loc[mask_q18, "info_regrouped"] = "Double-sens cyclable"
 
-    df.loc[mask_q35, 'info'] =  "Routes_services_chemins_agricoles-2x"
-    df.loc[mask_q35, 'info_regrouped'] = "Routes_services_chemins_agricoles"
+    df.loc[mask_q18, "info"] = "Double-sens cyclable piste à gauche"
+    df.loc[mask_q18, "info_regrouped"] = "Double-sens cyclable"
 
-    df.loc[mask_q36, 'info'] =  "Trottoirs_cyclables-1x"
-    df.loc[mask_q36, 'info_regrouped'] = "Trottoirs_cyclables"
+    df.loc[mask_q19, "info"] = "Chemin piéton"
+    df.loc[mask_q19, "info_regrouped"] = "Chemin piéton"
 
-    df.loc[mask_q37, 'info'] =  "Trottoirs_cyclables-1xD"
-    df.loc[mask_q37, 'info_regrouped'] = "Trottoirs_cyclables"
+    df.loc[mask_q20, "info"] = "Chemin piéton des 2 côtés"
+    df.loc[mask_q20, "info_regrouped"] = "Chemin piéton"
 
-    df.loc[mask_q38, 'info'] =  "Trottoirs_cyclables-1xG"
-    df.loc[mask_q38, 'info_regrouped'] = "Trottoirs_cyclables"
+    df.loc[mask_q21, "info"] = "Limite à 30"
+    df.loc[mask_q21, "info_regrouped"] = "Limite à 30"
 
-    df.loc[mask_q39, 'info'] =  "Trottoirs_cyclables-2x"
-    df.loc[mask_q39, 'info_regrouped'] = "Pistes_sur_Trottoirs"
+    df.loc[mask_q22, "info"] = "Limite à 30 des 2 côtés"
+    df.loc[mask_q22, "info_regrouped"] = "Limite à 30"
 
-    df.loc[mask_q40, 'info'] =  "Voies_bus-1xD"
-    df.loc[mask_q40, 'info_regrouped'] = "Voies_bus"
+    df.loc[mask_q23, "info"] = "Chemin piéton"
+    df.loc[mask_q23, "info_regrouped"] = "Chemin piéton"
 
-    df.loc[mask_q41, 'info'] =  "Voies_bus-1xG"
-    df.loc[mask_q41, 'info_regrouped'] = "Voies_bus"
+    df.loc[mask_q24, "info"] = "Chemin piéton des 2 côtés"
+    df.loc[mask_q24, "info_regrouped"] = "Chemin piéton"
 
-    df.loc[mask_q42, 'info'] =  "Voies_bus-2x"
-    df.loc[mask_q42, 'info_regrouped'] = "Voies_bus"
+    df.loc[mask_q25, "info"] = "Piste cyclable à droite"
+    df.loc[mask_q25, "info_regrouped"] = "Piste cyclable"
 
-    df.loc[mask_q43, 'info'] =  "Voies_vertes-1x"
-    df.loc[mask_q43, 'info_regrouped'] = "Voies_vertes"
+    df.loc[mask_q26, "info"] = "Piste cyclable à gauche"
+    df.loc[mask_q26, "info_regrouped"] = "Piste cyclable"
 
-    df.loc[mask_q44, 'info'] =  "Voies_vertes-2x"
-    df.loc[mask_q44, 'info_regrouped'] = "Voies_vertes"
+    df.loc[mask_q27, "info"] = "Piste cyclable des 2 côtés"
+    df.loc[mask_q27, "info_regrouped"] = "Piste cyclable"
 
-    df.loc[mask_q45, 'info'] =  "Zones_30-1x"
-    df.loc[mask_q45, 'info_regrouped'] = "Zones_30"
+    df.loc[mask_q28, "info"] = "Piste cyclable à droite (2 voies)"
+    df.loc[mask_q28, "info_regrouped"] = "Piste cyclable"
 
-    df.loc[mask_q46, 'info'] =  "Zones_30-2x"
-    df.loc[mask_q46, 'info_regrouped'] = "Zones_30"
+    df.loc[mask_q29, "info"] = "Piste cyclable à gauche (2 voies)"
+    df.loc[mask_q29, "info_regrouped"] = "Piste cyclable"
 
-    df.loc[mask_q47, 'info'] =  "Zones_rencontre-1x"
-    df.loc[mask_q47, 'info_regrouped'] = "Zones_rencontre"
-    
-    df.loc[mask_q48, 'info'] =  "Zones_rencontre-2x"
-    df.loc[mask_q48, 'info_regrouped'] = "Zones_rencontre"
-    
-    df.loc[mask_q49, 'info'] =  "chaucidou"
-    df.loc[mask_q49, 'info_regrouped'] = "chaucidou"
-    
-    df.loc[mask_q50, 'info'] =  "escalier"
-    df.loc[mask_q50, 'info_regrouped'] = "escalier"
-    
-    df.loc[mask_q51, 'info'] =  "footway_permissive-1x"
-    df.loc[mask_q51, 'info_regrouped'] = "footway_permissive"
-    
-    df.loc[mask_q52, 'info'] =  "footway_permissive-2x"
-    df.loc[mask_q52, 'info_regrouped'] = "footway_permissive"
+    df.loc[mask_q30, "info"] = "Piste sur trottoir"
+    df.loc[mask_q30, "info_regrouped"] = "Piste sur trottoir"
+
+    df.loc[mask_q31, "info"] = "Piste sur trottoir à droite"
+    df.loc[mask_q31, "info_regrouped"] = "Piste sur trottoir"
+
+    df.loc[mask_q32, "info"] = "Piste sur trottoir à gauche"
+    df.loc[mask_q32, "info_regrouped"] = "Piste sur trottoir"
+
+    df.loc[mask_q33, "info"] = "Piste sur trottoir des 2 côtés"
+    df.loc[mask_q33, "info_regrouped"] = "Piste sur trottoir"
+
+    df.loc[mask_q34, "info"] = "Route de service / chemin agricole"
+    df.loc[mask_q34, "info_regrouped"] = "Route de service / chemin agricole"
+
+    df.loc[mask_q35, "info"] = "Route de service / chemin agricole des 2 côtés"
+    df.loc[mask_q35, "info_regrouped"] = "Route de service / chemin agricole"
+
+    df.loc[mask_q36, "info"] = "Trottoir cyclable"
+    df.loc[mask_q36, "info_regrouped"] = "Trottoir cyclable"
+
+    df.loc[mask_q37, "info"] = "Trottoir cyclable à droite"
+    df.loc[mask_q37, "info_regrouped"] = "Trottoir cyclable"
+
+    df.loc[mask_q38, "info"] = "Trottoir cyclable à gauche"
+    df.loc[mask_q38, "info_regrouped"] = "Trottoir cyclable"
+
+    df.loc[mask_q39, "info"] = "Piste sur trottoir"
+    df.loc[mask_q39, "info_regrouped"] = "Piste sur trottoir"
+
+    df.loc[mask_q40, "info"] = "Voie bus à droite"
+    df.loc[mask_q40, "info_regrouped"] = "Voie bus"
+
+    df.loc[mask_q41, "info"] = "Voie bus à gauche"
+    df.loc[mask_q41, "info_regrouped"] = "Voie bus"
+
+    df.loc[mask_q42, "info"] = "Voie bus des 2 côtés"
+    df.loc[mask_q42, "info_regrouped"] = "Voie bus"
+
+    df.loc[mask_q43, "info"] = "Voie verte"
+    df.loc[mask_q43, "info_regrouped"] = "Voie verte"
+
+    df.loc[mask_q44, "info"] = "Voie verte des 2 côtés"
+    df.loc[mask_q44, "info_regrouped"] = "Voie verte"
+
+    df.loc[mask_q45, "info"] = "Zone 30"
+    df.loc[mask_q45, "info_regrouped"] = "Zone 30"
+
+    df.loc[mask_q46, "info"] = "Zone 30"
+    df.loc[mask_q46, "info_regrouped"] = "Zone 30"
+
+    df.loc[mask_q47, "info"] = "Zone de rencontre"
+    df.loc[mask_q47, "info_regrouped"] = "Zone de rencontre"
+
+    df.loc[mask_q48, "info"] = "Zone de rencontre"
+    df.loc[mask_q48, "info_regrouped"] = "Zone de rencontre"
+
+    df.loc[mask_q49, "info"] = "chaucidou"
+    df.loc[mask_q49, "info_regrouped"] = "chaucidou"
+
+    df.loc[mask_q50, "info"] = "escalier"
+    df.loc[mask_q50, "info_regrouped"] = "escalier"
+
+    df.loc[mask_q51, "info"] = "Chemin piéton"
+    df.loc[mask_q51, "info_regrouped"] = "Chemin piéton"
+
+    df.loc[mask_q52, "info"] = "Chemin piéton"
+    df.loc[mask_q52, "info_regrouped"] = "Chemin piéton"
 
     return df

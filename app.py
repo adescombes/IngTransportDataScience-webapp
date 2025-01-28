@@ -57,6 +57,17 @@ def process_rectangle():
 
         filtered_line = geovelo_pandas_filters(line.copy())
 
+        total_length = line["length"].sum()
+        filtered_line["length_prct"] = filtered_line["length"].apply(
+            lambda x: 100 * x / total_length
+        )
+
+        # enlever les valeurs pour les routes "autres routes"
+        # pour ne pas qu'elles apparaissent sur l'histogramme
+        filtered_line.loc[
+            filtered_line["info_regrouped"] == "autres routes", "length_prct"
+        ] = 0
+
         # fin des queries geovelo -> couche geojson
         geojson_data = filtered_line.to_crs(4326).to_json()
         app.logger.debug("Données GeoJSON générées")
