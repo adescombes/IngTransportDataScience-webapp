@@ -9,7 +9,7 @@ import pandas as pd
 import os
 from shapely.geometry import Polygon, box
 
-from scripts.geovelo_sql_queries import queries
+from scripts.geovelo_pandas_filters import geovelo_pandas_filters
 from scripts.helpers import *
 
 
@@ -51,11 +51,14 @@ def process_rectangle():
         line = line[
             line.geometry.geom_type == "LineString"
         ].reset_index()  # only the line geometries
+        line.crs = "EPSG:4326"
+        line = line.to_crs(2056)
+        line["length"] = line.length
 
+        filtered_line = geovelo_pandas_filters(line.copy())
 
         # fin des queries geovelo -> couche geojson
-
-        geojson_data = line.to_crs("EPSG:4326").to_json()
+        geojson_data = filtered_line.to_crs(4326).to_json()
         app.logger.debug("Données GeoJSON générées")
 
         return jsonify({"geojson": geojson_data})

@@ -1,9 +1,58 @@
 def geovelo_pandas_filters(df):
 
-    df["info"] = "0"
-    df["info_regrouped"] = "0"
+    required_columns = [
+        "oneway",
+        "cycleway",
+        "cycleway:right",
+        "cycleway:left",
+        "cycleway:both",
+        "oneway:bicycle",
+        "highway",
+        "junction",
+        "psv",
+        "bus",
+        "access",
+        "motor_vehicle",
+        "motorcar",
+        "motorcycle",
+        "bicycle",
+        "cycleway:right:bicycle",
+        "cycleway:left:bicycle",
+        "cycleway:both:bicycle",
+        "sidewalk",
+        "sidewalk:right:bicycle",
+        "sidewalk:left:bicycle",
+        "sidewalk:both:bicycle",
+        "sidewalk:segregated",
+        "sidewalk:right:segregated",
+        "sidewalk:left:segregated",
+        "sidewalk:both:segregated",
+        "footway",
+        "segregated",
+        "surface",
+        "smoothness",
+        "tracktype",
+        "maxspeed",
+        "maxspeed:type",
+        "zone:maxspeed",
+        "source:maxspeed",
+        "length_line[m]",
+        "busway",
+        "busway:right",
+        "busway:left",
+        "ramp:bicycle",
+        "ramp:bicycle:right",
+        "ramp:bicycle:left",
+        "ramp:bicycle:both",
+    ]
 
-    # q1
+    missing_columns = [col for col in required_columns if col not in df.columns]
+    if missing_columns:
+        print(f"Colonnes manquantes : {missing_columns}")
+
+    # on check si toutes les colonnes requises pour les maskques sont présentes, sinon valeurs None par défaut
+    for col in missing_columns:
+        df[col] = None
 
     mask_q1 = (
         (
@@ -15,11 +64,6 @@ def geovelo_pandas_filters(df):
         & ((df["cycleway"] == "shoulder") | (df["cycleway:right"] == "shoulder"))
         | (df["oneway"] == "-1") & (df["cycleway:left"] == "shoulder")
     )
-
-    df.loc["mask_q1", "info"] = "Accotements_cyclables-1xD"
-    df.loc["mask_q1", "info_regrouped"] = "Accotements_cyclables"
-
-    # q2
 
     mask_q2 = (
         (
@@ -33,21 +77,11 @@ def geovelo_pandas_filters(df):
         & ((df["cycleway:left"] == "shoulder") | (df["cycleway"] == "shoulder"))
     )
 
-    df.loc["mask_q2", "info"] = "Accotements_cyclables-1xG"
-    df.loc["mask_q2", "info_regrouped"] = "Accotements_cyclables"
-
-    # q3
-
     mask_q3 = (df["oneway"].isnull() | (df["oneway"] == "no")) & (
         (df["cycleway"] == "shoulder")
         | ((df["cycleway:right"] == "shoulder") & (df["cycleway:left"] == "shoulder"))
         | (df["cycleway:both"] == "shoulder")
     )
-
-    df.loc["mask_q3", "info"] = "Accotements_cyclables-2x"
-    df.loc["mask_q3", "info_regrouped"] = "Accotements_cyclables"
-
-    # q4
 
     mask_q4 = (
         (df["highway"].isin(["footway", "path"]))
@@ -55,10 +89,6 @@ def geovelo_pandas_filters(df):
         & (df["segregated"].isnull() | (df["segregated"] == "no"))
     )
 
-    df.loc["mask_q4", "info"] = "Autres_chemins_piéton_autorisé_aux_vélos-1x"
-    df.loc["mask_q4", "info_regrouped"] = "Autres_chemins_piéton_autorisé_aux_vélos"
-
-    # q5
     mask_q5 = (
         (
             (df["oneway"].isnull() | ~df["oneway"].isin(["yes", "-1"]))
@@ -115,10 +145,6 @@ def geovelo_pandas_filters(df):
         )
     )
 
-    df.loc["mask_q5", "info"] = "Autres_chemins_piéton_autorisé_aux_vélos-2x"
-    df.loc["mask_q5", "info_regrouped"] = "Autres_chemins_piéton_autorisé_aux_vélos"
-
-    # q6
     mask_q6 = (
         (
             (df["oneway"].isnull() | ~df["oneway"].isin(["yes", "-1"]))
@@ -143,10 +169,6 @@ def geovelo_pandas_filters(df):
         )
     )
 
-    df.loc["mask_q6", "info"] = "Bandes_cyclables-1xD"
-    df.loc["mask_q6", "info_regrouped"] = "Bandes_cyclables"
-
-    # q7
     mask_q7 = (
         (
             (df["oneway"].isnull() | ~df["oneway"].isin(["yes", "-1"]))
@@ -171,10 +193,6 @@ def geovelo_pandas_filters(df):
         )
     )
 
-    df.loc["mask_q7", "info"] = "Bandes_cyclables-1xG"
-    df.loc["mask_q7", "info_regrouped"] = "Bandes_cyclables"
-
-    # q8
     mask_q8 = (
         (
             (df["oneway"].isnull() | (df["oneway"] == "no"))
@@ -194,22 +212,10 @@ def geovelo_pandas_filters(df):
         & ((df["lanes"].isnull() | ~df["lanes"].isin(["1"])))
     )
 
-    df.loc["mask_q8", "info"] = "Bandes_cyclables-2x"
-    df.loc["mask_q8", "info_regrouped"] = "Bandes_cyclables"
-
-    # q9
     mask_q9 = df["cycleway:right"].isin(["lane", "opposite_lane"])
 
-    df.loc["mask_q9", "info"] = "Bandes_cyclables-2xD"
-    df.loc["mask_q9", "info_regrouped"] = "Bandes_cyclables"
-
-    # q10
     mask_q10 = df["cycleway:left"].isin(["lane", "opposite_lane"])
 
-    df.loc["mask_q10", "info"] = "Bandes_cyclables-2xG"
-    df.loc["mask_q10", "info_regrouped"] = "Bandes_cyclables"
-
-    # q11
     mask_q11 = (
         (
             (df["oneway"].isnull() | ~df["oneway"].isin(["yes", "-1"]))
@@ -234,10 +240,6 @@ def geovelo_pandas_filters(df):
         | ((df["oneway"] == "-1") & (df["cycleway:left"] == "shared_lane"))
     )
 
-    df.loc["mask_q11", "info"] = "Cheminements_cyclables-1xD"
-    df.loc["mask_q11", "info_regrouped"] = "Cheminements_cyclables"
-
-    # q12
     mask_q12 = (
         (
             (df["oneway"].isnull() | ~df["oneway"].isin(["yes", "-1"]))
@@ -268,10 +270,6 @@ def geovelo_pandas_filters(df):
         )
     )
 
-    df.loc["mask_q12", "info"] = "Cheminements_cyclables-1xG"
-    df.loc["mask_q12", "info_regrouped"] = "Cheminements_cyclables"
-
-    # q13
     mask_q13 = (
         (df["oneway"].isnull() | (df["oneway"] == "no"))
         & (df["junction"].isnull() | ~df["junction"].isin(["roundabout", "circular"]))
@@ -284,10 +282,6 @@ def geovelo_pandas_filters(df):
         | (df["cycleway:both"] == "shared_lane")
     )
 
-    df.loc["mask_q13", "info"] = "Cheminements_cyclables-2x"
-    df.loc["mask_q13", "info_regrouped"] = "Cheminements_cyclables"
-
-    # q14
     mask_q14 = (
         (
             (df["oneway"].isin(["yes", "-1"]))
@@ -329,10 +323,6 @@ def geovelo_pandas_filters(df):
         )
     )
 
-    df.loc["mask_q14", "info"] = "Doubles-sens_cyclables_sans_bande"
-    df.loc["mask_q14", "info_regrouped"] = "Double-sens_cyclables"
-
-    # q15
     mask_q15 = (
         (df["oneway"].isin(["yes", "-1"])) & (df["cycleway:right"] == "opposite_lane")
     ) | (
@@ -344,10 +334,6 @@ def geovelo_pandas_filters(df):
         )
     )
 
-    df.loc["mask_q15", "info"] = "Doubles-sens_cyclables_en_bande-D"
-    df.loc["mask_q15", "info_regrouped"] = "Double-sens_cyclables"
-
-    # q16
     mask_q16 = (
         (df["oneway"].isin(["yes", "-1"])) & (df["cycleway:left"] == "opposite_lane")
     ) | (
@@ -359,10 +345,6 @@ def geovelo_pandas_filters(df):
         )
     )
 
-    df.loc["mask_q16", "info"] = "Doubles-sens_cyclables_en_bande-G"
-    df.loc["mask_q16", "info_regrouped"] = "Double-sens_cyclables"
-
-    # q17
     mask_q17 = (
         (df["oneway"].isin(["yes", "-1"])) & (df["cycleway:right"] == "opposite_track")
     ) | (
@@ -374,10 +356,6 @@ def geovelo_pandas_filters(df):
         )
     )
 
-    df.loc["mask_q17", "info"] = "Doubles-sens_cyclables_piste-D"
-    df.loc["mask_q17", "info_regrouped"] = "Double-sens_cyclables"
-
-    # q18
     mask_q18 = (
         (df["oneway"].isin(["yes", "-1"])) & (df["cycleway:left"] == "opposite_track")
     ) | (
@@ -389,10 +367,6 @@ def geovelo_pandas_filters(df):
         )
     )
 
-    df.loc["mask_q18", "info"] = "Doubles-sens_cyclables_piste-G"
-    df.loc["mask_q18", "info_regrouped"] = "Double-sens_cyclables"
-
-    # q19
     mask_q19 = (
         (df["oneway"].isin(["yes", "-1"]) | df["oneway:bicycle"].isin(["yes", "-1"]))
         & (
@@ -450,10 +424,6 @@ def geovelo_pandas_filters(df):
         )
     )
 
-    df.loc["mask_q19", "info"] = "Footway_path_designated-1x"
-    df.loc["mask_q19", "info_regrouped"] = "Footway_path_designated"
-
-    # q20
     mask_q20 = (
         (
             (df["oneway"].isnull() | ~df["oneway"].isin(["yes", "-1"]))
@@ -517,50 +487,30 @@ def geovelo_pandas_filters(df):
         )
     )
 
-    df.loc["mask_q20", "info"] = "Footway_path_designated-2x"
-    df.loc["mask_q20", "info_regrouped"] = "Footway_path_designated"
-
-    # q21
     mask_q21 = (
         (df["maxspeed"] == "30")
         & ((df["maxspeed:type"].isnull() | (df["maxspeed:type"] != "CH:zone30")))
         & (df["oneway"].isin(["yes", "-1"]))
     )
 
-    df.loc["mask_q21", "info"] = "Limite_a_30-1x"
-    df.loc["mask_q21", "info_regrouped"] = "Limite_a_30"
-
-    # q22
     mask_q22 = (
         (df["maxspeed"] == "30")
         & ((df["maxspeed:type"].isnull() | (df["maxspeed:type"] != "CH:zone30")))
         & (df["oneway"].isnull() | (df["oneway"] == "no"))
     )
 
-    df.loc["mask_q22", "info"] = "Limite_a_30-2x"
-    df.loc["mask_q22", "info_regrouped"] = "Limite_a_30"
-
-    # q23
     mask_q23 = (
         (df["highway"] == "pedestrian")
         & (df["oneway"].isin(["yes", "-1"]))
         & (df["bicycle"].isnull() | (df["bicycle"] != "no"))
     )
 
-    df.loc["mask_q23", "info"] = "Pedestrian_1x"
-    df.loc["mask_q23", "info_regrouped"] = "Pedestrian"
-
-    # q24
     mask_q24 = (
         (df["highway"] == "pedestrian")
         & (df["oneway"].isnull() | (df["oneway"] == "no"))
         & (df["bicycle"].isnull() | (df["bicycle"] != "no"))
     )
 
-    df.loc["mask_q24", "info"] = "Pedestrian_2x"
-    df.loc["mask_q24", "info_regrouped"] = "Pedestrian"
-
-    # q25
     mask_q25 = ((df["oneway"] == "yes") & (df["highway"] == "cycleway")) | (
         (
             (df["cycleway:right"] == "track")
@@ -580,10 +530,6 @@ def geovelo_pandas_filters(df):
         )
     )
 
-    df.loc["mask_q25", "info"] = "Pistes_cyclables-1xD"
-    df.loc["mask_q25", "info_regrouped"] = "Pistes_cyclables"
-
-    # q26
     mask_q26 = (
         ((df["cycleway"] == "track") & (df["oneway"] == "-1"))
         | (
@@ -606,10 +552,6 @@ def geovelo_pandas_filters(df):
         )
     )
 
-    df.loc["mask_q26", "info"] = "Pistes_cyclables-1xG"
-    df.loc["mask_q26", "info_regrouped"] = "Pistes_cyclables"
-
-    # q27
     mask_q27 = (df["oneway"].isnull() | ~df["oneway"].isin(["yes", "-1"])) & (
         (df["highway"] == "cycleway")
         | (
@@ -622,22 +564,10 @@ def geovelo_pandas_filters(df):
         )
     )
 
-    df.loc["mask_q27", "info"] = "Pistes_cyclables-2x"
-    df.loc["mask_q27", "info_regrouped"] = "Pistes_cyclables"
-
-    # q28
     mask_q28 = df["cycleway:right"].isin(["track", "opposite_track"])
 
-    df.loc["mask_q28", "info"] = "Pistes_cyclables-2xD"
-    df.loc["mask_q28", "info_regrouped"] = "Pistes_cyclables"
-
-    # q29
     mask_q29 = df["cycleway:left"].isin(["track", "opposite_track"])
 
-    df.loc["mask_q29", "info"] = "Pistes_cyclables-2xG"
-    df.loc["mask_q29", "info_regrouped"] = "Pistes_cyclables"
-
-    # q30
     mask_q30 = (
         (df["segregated"] == "yes")
         & (df["highway"] == "footway")
@@ -648,10 +578,7 @@ def geovelo_pandas_filters(df):
             | (df["oneway:bicycle"].isin(["yes", "-1"]))
         )
     )
-    df.loc["mask_q30", "info"] = "Pistes_sur_Trottoirs-1x"
-    df.loc["mask_q30", "info_regrouped"] = "Pistes_sur_Trottoirs"
 
-    # q31
     mask_q31 = (
         (df["segregated"] == "yes")
         & (df["highway"] == "footway")
@@ -667,10 +594,6 @@ def geovelo_pandas_filters(df):
         )
     )
 
-    df.loc["mask_q31", "info"] = "Pistes_sur_Trottoirs-1xD"
-    df.loc["mask_q31", "info_regrouped"] = "Pistes_sur_Trottoirs"
-
-    # q32
     mask_q32 = (
         (df["segregated"] == "yes")
         & (df["highway"] == "footway")
@@ -686,10 +609,6 @@ def geovelo_pandas_filters(df):
         )
     )
 
-    df.loc["mask_q32", "info"] = "Pistes_sur_Trottoirs-1xG"
-    df.loc["mask_q32", "info_regrouped"] = "Pistes_sur_Trottoirs"
-
-    # q33
     mask_q33 = (
         (df["segregated"] == "yes")
         & (df["highway"] == "footway")
@@ -708,10 +627,7 @@ def geovelo_pandas_filters(df):
             )
         )
     )
-    df.loc["mask_q33", "info"] = "Pistes_sur_Trottoirs-2x"
-    df.loc["mask_q33", "info_regrouped"] = "Pistes_sur_Trottoirs"
 
-    # q34
     mask_q34 = (
         (
             df["highway"].isin(
@@ -795,10 +711,7 @@ def geovelo_pandas_filters(df):
             & (df["oneway:bicycle"].isnull() | df["oneway:bicycle"].isin(["yes", "-1"]))
         )
     )
-    df.loc["mask_q34", "info"] = "Routes_services_chemins_agricoles-1x"
-    df.loc["mask_q34", "info_regrouped"] = "Routes_services_chemins_agricoles"
 
-    # q35
     mask_q35 = (
         (
             df["highway"].isin(
@@ -883,10 +796,6 @@ def geovelo_pandas_filters(df):
         & (df["oneway:bicycle"].isnull() | ~df["oneway:bicycle"].isin(["yes", "-1"]))
     )
 
-    df.loc["mask_q35", "info"] = "Routes_services_chemins_agricoles-2x"
-    df.loc["mask_q35", "info_regrouped"] = "Routes_services_chemins_agricoles"
-
-    # q36
     mask_q36 = (
         (df["segregated"].isnull() | (df["segregated"] != "yes"))
         & (df["highway"] == "footway")
@@ -897,10 +806,7 @@ def geovelo_pandas_filters(df):
             | (df["oneway:bicycle"].isin(["yes", "-1"]))
         )
     )
-    df.loc["mask_q36", "info"] = "Trottoirs_cyclables-1x"
-    df.loc["mask_q36", "info_regrouped"] = "Trottoirs_cyclables"
 
-    # q37
     mask_q37 = (
         (df["segregated"].isnull() | (df["segregated"] != "yes"))
         & (df["highway"] == "footway")
@@ -916,10 +822,6 @@ def geovelo_pandas_filters(df):
         )
     )
 
-    df.loc["mask_q37", "info"] = "Trottoirs_cyclables-1xD"
-    df.loc["mask_q37", "info_regrouped"] = "Trottoirs_cyclables"
-
-    # q38
     mask_q38 = (
         (df["segregated"].isnull() | (df["segregated"] != "yes"))
         & (df["highway"] == "footway")
@@ -934,10 +836,7 @@ def geovelo_pandas_filters(df):
             | (df["sidewalk:right:bicycle"] == "no")
         )
     )
-    df.loc["mask_q38", "info"] = "Trottoirs_cyclables-1xG"
-    df.loc["mask_q38", "info_regrouped"] = "Trottoirs_cyclables"
 
-    # q39
     mask_q39 = (
         (df["segregated"].isnull() | (df["segregated"] != "yes"))
         & (df["highway"] == "footway")
@@ -956,11 +855,6 @@ def geovelo_pandas_filters(df):
             )
         )
     )
-
-    df.loc["mask_q39", "info"] = "Trottoirs_cyclables-2x"
-    df.loc["mask_q39", "info_regrouped"] = "Trottoirs_cyclables"
-
-    # q40
 
     mask_q40 = (
         (
@@ -1011,10 +905,7 @@ def geovelo_pandas_filters(df):
             )
         )
     )
-    df.loc["mask_q40", "info"] = "Voies_bus-1xD"
-    df.loc["mask_q40", "info_regrouped"] = "Voies_bus"
 
-    # q41
     mask_q41 = (
         (
             # A - Les cas où la voie est à sens unique
@@ -1072,10 +963,6 @@ def geovelo_pandas_filters(df):
         )
     )
 
-    df.loc["mask_q41", "info"] = "Voies_bus-1xG"
-    df.loc["mask_q41", "info_regrouped"] = "Voies_bus"
-
-    # q42
     mask_q42 = (
         # Cas 1 : Rue à sens unique avec voies vélo spécifiées
         df["oneway"].isin(["yes", "-1"])
@@ -1137,10 +1024,6 @@ def geovelo_pandas_filters(df):
         )
     )
 
-    df.loc["mask_q42", "info"] = "Voies_bus-2x"
-    df.loc["mask_q42", "info_regrouped"] = "Voies_bus"
-
-    # q43
     mask_q43 = (
         df["oneway"].isin(["yes", "-1"]) | df["oneway:bicycle"].isin(["yes", "-1"])
     ) & (
@@ -1148,10 +1031,7 @@ def geovelo_pandas_filters(df):
         & (df["bicycle"] == "designated")
         & (df["foot"] == "designated")
     )
-    df.loc["mask_q43", "info"] = "Voies_vertes-1x"
-    df.loc["mask_q43", "info_regrouped"] = "Voies_vertes"
 
-    # q44
     mask_q44 = (
         (df["oneway"].isnull() | (df["oneway"] == "no"))
         & (df["oneway:bicycle"].isnull() | (df["oneway:bicycle"] == "no"))
@@ -1160,20 +1040,14 @@ def geovelo_pandas_filters(df):
         & (df["bicycle"] == "designated")
         & (df["foot"] == "designated")
     )
-    df.loc["mask_q44", "info"] = "Voies_vertes-2x"
-    df.loc["mask_q44", "info_regrouped"] = "Voies_vertes"
 
-    # q45
     mask_q45 = (
         (df["maxspeed"] == "30")
         & ((df["maxspeed:type"] != "CH:zone30"))
         & (df["oneway"].isin(["yes", "-1"]))
         & (df["bicycle"].isnull() | (df["bicycle"] != "no"))
     )
-    df.loc["mask_q45", "info"] = "Zones_30-1x"
-    df.loc["mask_q45", "info_regrouped"] = "Zones_30"
 
-    # q46
     mask_q46 = (
         (df["maxspeed"] == "30")
         & ((df["maxspeed:type"] != "CH:zone30"))
@@ -1184,10 +1058,7 @@ def geovelo_pandas_filters(df):
         # Condition 4 : "bicycle" est NULL ou n'est pas 'no'
         (df["bicycle"].isnull() | (df["bicycle"] != "no"))
     )
-    df.loc["mask_q46", "info"] = "Zones_30-2x"
-    df.loc["mask_q46", "info_regrouped"] = "Zones_30"
 
-    # q47
     mask_q47 = (
         # Condition 1 : "oneway" est 'yes' ou '-1'
         (df["oneway"].isin(["yes", "-1"]))
@@ -1202,10 +1073,7 @@ def geovelo_pandas_filters(df):
             )
         )
     )
-    df.loc["mask_q47", "info"] = "Zones_rencontre-1x"
-    df.loc["mask_q47", "info_regrouped"] = "Zones_rencontre"
 
-    # q48
     mask_q48 = (
         # Condition 1 : La voie est à double sens
         (df["oneway"].isnull() | (df["oneway"] == "no"))
@@ -1220,10 +1088,7 @@ def geovelo_pandas_filters(df):
             )
         )
     )
-    df.loc["mask_q48", "info"] = "Zones_rencontre-2x"
-    df.loc["mask_q48", "info_regrouped"] = "Zones_rencontre"
 
-    # q49
     mask_q49 = (
         # Condition 1 : Une route explicitement à double sens
         (
@@ -1244,10 +1109,7 @@ def geovelo_pandas_filters(df):
         # Condition 3 : La route ne comporte qu'une seule voie
         (df["lanes"] == "1")
     )
-    df.loc["mask_q49", "info"] = "chaucidou"
-    df.loc["mask_q49", "info_regrouped"] = "chaucidou"
 
-    # q50
     mask_q50 = (
         # Condition 1 : La voie est un escalier
         (df["highway"] == "steps")
@@ -1255,10 +1117,7 @@ def geovelo_pandas_filters(df):
         # Condition 2 : Avec une goulotte pour vélos à droite
         (df["ramp:bicycle"] == "yes")
     )
-    df.loc["mask_q50", "info"] = "escalier"
-    df.loc["mask_q50", "info_regrouped"] = "escalier"
 
-    # q53
     mask_q51 = (
         # Condition 1 : La voie est à sens unique pour les voitures ou les vélos
         (df["oneway"].isin(["yes", "-1"]) | df["oneway:bicycle"].isin(["yes", "-1"]))
@@ -1316,10 +1175,7 @@ def geovelo_pandas_filters(df):
             )
         )
     )
-    df.loc["mask_q51", "info"] = "footway_permissive-1x"
-    df.loc["mask_q51", "info_regrouped"] = "footway_permissive"
 
-    # q54
     mask_q52 = (
         # Condition 1 : La voie n'est pas à sens unique pour les voitures ou les vélos
         (df["oneway"].isnull() | ~df["oneway"].isin(["yes", "-1"]))
@@ -1378,7 +1234,167 @@ def geovelo_pandas_filters(df):
             )
         )
     )
-    df.loc["mask_q52", "info"] = "footway_permissive-2x"
-    df.loc["mask_q52", "info_regrouped"] = "footway_permissive"
+
+    df["info"] = "0"
+    df["info_regrouped"] = "0"
+
+    df.loc[mask_q1, 'info'] = "Accotements_cyclables-1xD"
+    df.loc[mask_q1, 'info_regrouped'] = "Accotements_cyclables"
+
+    df.loc[mask_q2, 'info'] = "Accotements_cyclables-1xG"
+    df.loc[mask_q2, 'info_regrouped'] = "Accotements_cyclables"
+
+    df.loc[mask_q3, 'info'] = "Accotements_cyclables-2x"
+    df.loc[mask_q3, 'info_regrouped'] = "Accotements_cyclables"
+    
+    df.loc[mask_q4, 'info'] = "Autres_chemins_piéton_autorisé_aux_vélos-1x"
+    df.loc[mask_q4, 'info_regrouped'] = "Autres_chemins_piéton_autorisé_aux_vélos"
+    
+    df.loc[mask_q5, 'info'] = "Autres_chemins_piéton_autorisé_aux_vélos-2x"
+    df.loc[mask_q5, 'info_regrouped'] = "Autres_chemins_piéton_autorisé_aux_vélos"
+    
+    df.loc[mask_q6, 'info'] = "Bandes_cyclables-1xD"
+    df.loc[mask_q6, 'info_regrouped'] = "Bandes_cyclables"
+    
+    df.loc[mask_q7, 'info'] = "Bandes_cyclables-1xG"
+    df.loc[mask_q7, 'info_regrouped'] = "Bandes_cyclables"
+    
+    df.loc[mask_q8, 'info'] = "Bandes_cyclables-2x"
+    df.loc[mask_q8, 'info_regrouped'] = "Bandes_cyclables"
+    
+    df.loc[mask_q9, 'info'] = "Bandes_cyclables-2xD"
+    df.loc[mask_q9, 'info_regrouped'] = "Bandes_cyclables"
+    
+    df.loc[mask_q10, 'info'] = "Bandes_cyclables-2xG"
+    df.loc[mask_q10, 'info_regrouped'] = "Bandes_cyclables"
+    
+    df.loc[mask_q11, 'info'] = "Cheminements_cyclables-1xD"
+    df.loc[mask_q11, 'info_regrouped'] = "Cheminements_cyclables"
+
+    df.loc[mask_q12, 'info'] = "Cheminements_cyclables-1xG"
+    df.loc[mask_q12, 'info_regrouped'] = "Cheminements_cyclables"
+
+    df.loc[mask_q13, 'info'] = "Cheminements_cyclables-2x"
+    df.loc[mask_q13, 'info_regrouped'] = "Cheminements_cyclables"
+
+    df.loc[mask_q14, 'info'] = "Doubles-sens_cyclables_sans_bande"
+    df.loc[mask_q14, 'info_regrouped'] = "Double-sens_cyclables"
+
+    df.loc[mask_q15, 'info'] = "Doubles-sens_cyclables_en_bande-D"
+    df.loc[mask_q15, 'info_regrouped'] = "Double-sens_cyclables"
+    
+    df.loc[mask_q16, 'info'] = "Doubles-sens_cyclables_en_bande-G"
+    df.loc[mask_q16, 'info_regrouped'] = "Double-sens_cyclables"
+
+    df.loc[mask_q17, 'info'] = "Doubles-sens_cyclables_piste-D"
+    df.loc[mask_q17, 'info_regrouped'] = "Double-sens_cyclables"
+    
+    df.loc[mask_q18, 'info'] = "Doubles-sens_cyclables_piste-G"
+    df.loc[mask_q18, 'info_regrouped'] = "Double-sens_cyclables"
+
+    df.loc[mask_q18, 'info'] = "Doubles-sens_cyclables_piste-G"
+    df.loc[mask_q18, 'info_regrouped'] = "Double-sens_cyclables"
+
+    df.loc[mask_q19, 'info'] = "Footway_path_designated-1x"
+    df.loc[mask_q19, 'info_regrouped'] = "Chemin piéton"
+
+    df.loc[mask_q20, 'info'] = "Footway_path_designated-2x"
+    df.loc[mask_q20, 'info_regrouped'] = "Chemin piéton"
+    
+    df.loc[mask_q21, 'info'] = "Limite_a_30-1x"
+    df.loc[mask_q21, 'info_regrouped'] = "Limite_a_30"
+
+    df.loc[mask_q22, 'info'] = "Limite_a_30-2x"
+    df.loc[mask_q22, 'info_regrouped'] = "Limite_a_30"
+
+    df.loc[mask_q23, 'info'] = "Pedestrian_1x"
+    df.loc[mask_q23, 'info_regrouped'] = "Chemin piéton"
+
+    df.loc[mask_q24, 'info'] = "Pedestrian_2x"
+    df.loc[mask_q24, 'info_regrouped'] = "Chemin piéton"
+
+    df.loc[mask_q25, 'info'] = "Pistes_cyclables-1xD"
+    df.loc[mask_q25, 'info_regrouped'] = "Pistes_cyclables"
+
+    df.loc[mask_q26, 'info'] = "Pistes_cyclables-1xG"
+    df.loc[mask_q26, 'info_regrouped'] = "Pistes_cyclables"
+    
+    df.loc[mask_q27, 'info'] = "Pistes_cyclables-2x"
+    df.loc[mask_q27, 'info_regrouped'] = "Pistes_cyclables"
+    
+    df.loc[mask_q28, 'info'] = "Pistes_cyclables-2xD"
+    df.loc[mask_q28, 'info_regrouped'] = "Pistes_cyclables"
+    
+    df.loc[mask_q29, 'info'] = "Pistes_cyclables-2xG"
+    df.loc[mask_q29, 'info_regrouped'] = "Pistes_cyclables"
+    
+    df.loc[mask_q30, 'info'] = "Pistes_sur_Trottoirs-1x"
+    df.loc[mask_q30, 'info_regrouped'] = "Pistes_sur_Trottoirs"
+
+    df.loc[mask_q31, 'info'] = "Pistes_sur_Trottoirs-1xD"
+    df.loc[mask_q31, 'info_regrouped'] = "Pistes_sur_Trottoirs"
+    
+    df.loc[mask_q32, 'info'] = "Pistes_sur_Trottoirs-1xG"
+    df.loc[mask_q32, 'info_regrouped'] = "Pistes_sur_Trottoirs"
+    
+    df.loc[mask_q33, 'info'] = "Pistes_sur_Trottoirs-2x"
+    df.loc[mask_q33, 'info_regrouped'] = "Pistes_sur_Trottoirs"
+
+    df.loc[mask_q34, 'info'] =  "Routes_services_chemins_agricoles-1x"
+    df.loc[mask_q34, 'info_regrouped'] = "Routes_services_chemins_agricoles"
+
+    df.loc[mask_q35, 'info'] =  "Routes_services_chemins_agricoles-2x"
+    df.loc[mask_q35, 'info_regrouped'] = "Routes_services_chemins_agricoles"
+
+    df.loc[mask_q36, 'info'] =  "Trottoirs_cyclables-1x"
+    df.loc[mask_q36, 'info_regrouped'] = "Trottoirs_cyclables"
+
+    df.loc[mask_q37, 'info'] =  "Trottoirs_cyclables-1xD"
+    df.loc[mask_q37, 'info_regrouped'] = "Trottoirs_cyclables"
+
+    df.loc[mask_q38, 'info'] =  "Trottoirs_cyclables-1xG"
+    df.loc[mask_q38, 'info_regrouped'] = "Trottoirs_cyclables"
+
+    df.loc[mask_q39, 'info'] =  "Trottoirs_cyclables-2x"
+    df.loc[mask_q39, 'info_regrouped'] = "Pistes_sur_Trottoirs"
+
+    df.loc[mask_q40, 'info'] =  "Voies_bus-1xD"
+    df.loc[mask_q40, 'info_regrouped'] = "Voies_bus"
+
+    df.loc[mask_q41, 'info'] =  "Voies_bus-1xG"
+    df.loc[mask_q41, 'info_regrouped'] = "Voies_bus"
+
+    df.loc[mask_q42, 'info'] =  "Voies_bus-2x"
+    df.loc[mask_q42, 'info_regrouped'] = "Voies_bus"
+
+    df.loc[mask_q43, 'info'] =  "Voies_vertes-1x"
+    df.loc[mask_q43, 'info_regrouped'] = "Voies_vertes"
+
+    df.loc[mask_q44, 'info'] =  "Voies_vertes-2x"
+    df.loc[mask_q44, 'info_regrouped'] = "Voies_vertes"
+
+    df.loc[mask_q45, 'info'] =  "Zones_30-1x"
+    df.loc[mask_q45, 'info_regrouped'] = "Zones_30"
+
+    df.loc[mask_q46, 'info'] =  "Zones_30-2x"
+    df.loc[mask_q46, 'info_regrouped'] = "Zones_30"
+
+    df.loc[mask_q47, 'info'] =  "Zones_rencontre-1x"
+    df.loc[mask_q47, 'info_regrouped'] = "Zones_rencontre"
+    
+    df.loc[mask_q48, 'info'] =  "Zones_rencontre-2x"
+    df.loc[mask_q48, 'info_regrouped'] = "Zones_rencontre"
+    
+    df.loc[mask_q49, 'info'] =  "chaucidou"
+    df.loc[mask_q49, 'info_regrouped'] = "chaucidou"
+    
+    df.loc[mask_q50, 'info'] =  "escalier"
+    df.loc[mask_q50, 'info_regrouped'] = "escalier"
+    
+    df.loc[mask_q51, 'info'] =  "footway_permissive-1x"
+    df.loc[mask_q51, 'info_regrouped'] = "footway_permissive"
+    
+    df.loc[mask_q52, 'info'] =  "footway_permissive-2x"
+    df.loc[mask_q52, 'info_regrouped'] = "footway_permissive"
 
     return df
