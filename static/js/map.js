@@ -1,8 +1,13 @@
-// Initialisation de la carte Leaflet
+var baseLayers = {};
+var overlays = {};
+
 var map = L.map('map').setView([46.52, 6.63], 13);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
 }).addTo(map);
+
+var layerControl = L.control.layers(baseLayers, overlays).addTo(map);
+
 
 const mapboxUrl = 'https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/{z}/{x}/{y}?access_token=sk.eyJ1IjoiYWRlLXRyYW5zaXRlYyIsImEiOiJjbTRiZzFxYWUwNDJ1MmtyNDNia29qYWN3In0.1dSIQ5MuxXILFGhf5aqYkA';
 const attr = '&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://labs.mapbox.com/contribute/" target="_blank">Improve this map</a></strong>contributors';
@@ -11,9 +16,9 @@ L.tileLayer(mapboxUrl, {
     attribution: attr
 }).addTo(map);
 
-let currentGeoJSON = null; // Variable pour stocker les données GeoJSON
+let currentGeoJSON = null; 
 let geojsonLayer;
-
+let elevationLayer;
 
 // Ajout des outils de dessin
 var drawnItems = new L.FeatureGroup();
@@ -21,7 +26,7 @@ map.addLayer(drawnItems);
 
 var drawControl = new L.Control.Draw({
     draw: {
-        rectangle: true, // Permet uniquement de dessiner des rectangles
+        rectangle: true, 
         polygon: false,
         polyline: false,
         circle: false,
@@ -51,29 +56,6 @@ map.on(L.Draw.Event.CREATED, function (event) {
 
     console.log('Coordonnées stockées :', currentCoordinates);
 });
-
-
-function updateLegendMap(data) {
-    L.geoJSON(data, {
-        style: function (feature) {
-            return {
-                color: getElevationColor(feature.properties.delta_z),
-                weight: 5
-            };
-        }
-    }).addTo(legendMap);
-}
-
-function getElevationColor(elevation) {
-    return elevation > 200 ? "#800026" :
-           elevation > 100 ? "#BD0026" :
-           elevation > 50  ? "#E31A1C" :
-           elevation > 20  ? "#FC4E2A" :
-           elevation > 10  ? "#FD8D3C" :
-           elevation > 5   ? "#FEB24C" :
-                             "#FFEDA0";
-}
-
 
 
 document.getElementById('run-button').addEventListener('click', function (event) {
@@ -107,17 +89,16 @@ document.getElementById('run-button').addEventListener('click', function (event)
                     })
                 }).addTo(map);
                 
+                layerControl.addOverlay(geojsonLayer, "Infrastructures cyclables");
+
                 map.fitBounds(geojsonLayer.getBounds());
     
                 // Afficher les boutons une fois la carte chargée
                 document.getElementById("download-osm-data").style.display = "block";
                 document.getElementById("elevation-button").style.display = "block";
-    
+                document.getElementById("download-elevation").style.display = "block";
+
                 plotHistogram(currentGeoJSON);
-
-                
-
-
                 
             } else {
                 console.error("Aucun GeoJSON retourné.");
@@ -132,12 +113,16 @@ document.getElementById('run-button').addEventListener('click', function (event)
 document.addEventListener('DOMContentLoaded', function () {
     const downloadButton = document.getElementById("download-osm-data");
     const elevationButton = document.getElementById("elevation-button");
+    const downloadElevation = document.getElementById("download-elevation");
 
     if (downloadButton) {
         downloadButton.style.display = "none";  // Caché au départ
     }
     if (elevationButton) {
         elevationButton.style.display = "none"; // Caché au départ
+    }
+    if (downloadElevation) {
+        downloadElevation.style.display = "none"; // Caché au départ
     }
 });
 
@@ -177,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-
+// légende pour les infras cyclables
 function addLegend(infoCategories) {
     var legend = L.control({ position: "bottomright" });
 
@@ -270,16 +255,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (geojsonLayer) {
                         map.removeLayer(geojsonLayer);
                     }
-                geojsonLayer = L.geoJSON(currentGeoJSON, {
+                var geojsonLayer = L.geoJSON(currentGeoJSON, {
                     style: feature => ({
-                        color: getColor(feature.properties.delta_z),
+                        color: getColor(feature.properties.pente),
+                        weight: 3,
+                        opacity: 1
+                    })
+                });
+
+
+                elevationLayer = L.geoJSON(currentGeoJSON, {
+                    style: feature => ({
+                        color: getElevationColor(feature.properties.pente),
                         weight: 3,
                         opacity: 1
                     })
                 }).addTo(map);
 
-                alert("Élévation calculée et ajoutée !");
-                updateLegendMap(currentGeoJSON); // Mettre à jour la carte des dénivelés
+                layerControl.addOverlay(elevationLayer, "Élévation");
+
+                addElevationLegend();
+
             } else {
                 alert("Erreur lors du calcul de l'élévation.");
             }
@@ -288,7 +284,94 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-/// ...... ELEVATION
+// légende pour le dénivelé
+function addElevationLegend() {
+    var legend = L.control({ position: "bottomright" });
+
+    legend.onAdd = function (map) {
+        var div = L.DomUtil.create("div", "pente legend");
+        div.innerHTML = "<h4>Dénivelé (%)</h4>";
+
+        // Définir les classes d'élévation utilisées dans getElevationColor
+        var elevationClasses = [
+            { range: "> 15%", color: "#800026" },
+            { range: "10 - 15%", color: "#BD0026" },
+            { range: "7.5 - 10%", color: "#E31A1C" },
+            { range: "5 - 7.5%", color: "#FC4E2A" },
+            { range: "2.5 - 5%", color: "#FD8D3C" },
+            { range: "0 - 2.5%", color: "#FEB24C" },
+        ];
+
+        // Boucle pour générer les éléments de légende
+        elevationClasses.forEach(entry => {
+            div.innerHTML += `
+                <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                    <div style="
+                        width: 30px; 
+                        height: 10px; 
+                        background-color: ${entry.color}; 
+                        margin-right: 10px;">
+                    </div>
+                    ${entry.range}
+                </div>`;
+        });
+
+        return div;
+    };
+
+    legend.addTo(map);
+}
+
+function getElevationColor(pente) {
+    return pente > 15 ? "#800026" :
+           pente > 10  ? "#BD0026" :
+           pente > 7.5  ? "#E31A1C" :
+           pente > 5  ? "#FC4E2A" :
+           pente > 2.5   ? "#FD8D3C" :
+           pente > 0   ? "#FEB24C" :
+           "#FFEDA0";  // Couleur pour valeurs négatives ou inconnues
+}
+
+
+// document.addEventListener('DOMContentLoaded', function () {
+
+    document.getElementById("download-elevation").addEventListener("click", function () {
+        if (!currentGeoJSON) {
+            alert("Veuillez d'abord calculer l'élévation avant de télécharger.");
+            return;
+        }
+    
+        console.log("Données envoyées à /download-elevation-csv :", currentGeoJSON);
+    
+        fetch("/download-elevation-csv", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ geojson: currentGeoJSON }) 
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.style.display = "none";
+            a.href = url;
+            a.download = "elevation_data.csv";
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            console.log("Fichier CSV d'élévation téléchargé avec succès.");
+        })
+        .catch(error => console.error("Erreur :", error));
+    });
+    
+
+// });
+
+
 
 // Histogramme
 

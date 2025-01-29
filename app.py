@@ -59,9 +59,6 @@ def process_rectangle():
         for _, row in filtered_line.iterrows():
 
             geom = row["geometry"]
-            print(geom)
-            print()
-            print(type(geom))
             c = loads(str(geom)).coords
 
             for i in range(len(c) - 1):
@@ -163,8 +160,7 @@ def get_elevation():
             elevation_start = get_elevation_swisstopo(coords[0])
             elevation_end = get_elevation_swisstopo(coords[-1])
             delta_z = float(elevation_end) - float(elevation_start)
-            print(delta_z)
-            filtered_line.at[_, "delta_z"] = delta_z
+            filtered_line.at[_, "delta_z"] = abs(delta_z)
 
         filtered_line["pente"] = filtered_line.apply(
             lambda x: 100 * x["delta_z"] / x["length"] if x["length"] != 0 else 0,
@@ -172,7 +168,6 @@ def get_elevation():
         )
 
         filtered_line = filtered_line.to_crs(epsg=4326)
-
         csv_path = "osm_data_elevation.csv"
         filtered_line.to_csv(csv_path, index=False)
 
@@ -183,19 +178,35 @@ def get_elevation():
         print(f"Erreur serveur : {e}")
         return jsonify({"error": str(e)}), 500
 
-    """
 
+@app.route("/download-elevation-csv", methods=["POST"])
+def download_elevation_csv():
+    try:
+        data = request.get_json()
 
+        if not data or "geojson" not in data:
+            return jsonify({"error": "Données manquantes"}), 400
 
-    
+        geojson = data["geojson"]
+        gdf = gpd.GeoDataFrame.from_features(geojson["features"])
 
-    return send_file(
-        csv_path, as_attachment=True, download_name="osm_data_elevation.csv"
-    )
+        # Vérifier que l'altitude est bien présente
+        if "pente" not in gdf.columns:
+            return jsonify({"error": "Aucune donnée d'altitude trouvée"}), 400
 
+        # Sauvegarder en CSV
+        csv_path = "osm_data_elevation.csv"
+        gdf.to_csv(csv_path, index=False)
 
-#    return jsonify({"geojson": filtered_line.to_json()})
-    """
+        return send_file(
+            csv_path,
+            as_attachment=True,
+            mimetype="text/csv",
+            download_name="osm_data_elevation.csv",
+        )
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":

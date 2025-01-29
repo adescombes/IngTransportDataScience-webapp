@@ -1,5 +1,5 @@
 /* pour cacher ces boutons au départ */
-#download-osm-data, #elevation-button {
+#download-osm-data, #elevation-button, #download-elevation {
     display: none;
 }
 
