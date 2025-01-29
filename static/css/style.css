@@ -1,23 +1,22 @@
+/* pour cacher ces boutons au départ */
+#download-osm-data, #elevation-button {
+    display: none;
+}
+
 body {
     margin: 0;
     font-family: Arial, sans-serif;
     display: flex;
     height: 100vh;
 }
-#left-pane, #right-pane {
-    width: 50%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
+
 #map {
     flex: 1;
 }
 
 #chart-container {
     flex: 1;
-    overflow-y: auto;
-    padding: 10px;
+    max-height: 50%;
 }
 
 .button {
@@ -38,13 +37,19 @@ body {
     flex-direction: column;
 }
 
-/* Partie droite : scrollable */
 #right-pane {
+    position: absolute;
+    right: 10px;
+    top: 10px;
     width: 50%;
-    height: 100vh;
     display: flex;
     flex-direction: column;
+    gap: 10px;
 }
 
-
-
+#legend-map, #chart {
+    width: 100%;
+    height: 100%;
+    flex: 1;
+    max-height: 50%;
+}

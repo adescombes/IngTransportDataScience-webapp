@@ -12,6 +12,7 @@ L.tileLayer(mapboxUrl, {
 }).addTo(map);
 
 let currentGeoJSON = null; // Variable pour stocker les données GeoJSON
+let geojsonLayer;
 
 
 // Ajout des outils de dessin
@@ -51,6 +52,30 @@ map.on(L.Draw.Event.CREATED, function (event) {
     console.log('Coordonnées stockées :', currentCoordinates);
 });
 
+
+function updateLegendMap(data) {
+    L.geoJSON(data, {
+        style: function (feature) {
+            return {
+                color: getElevationColor(feature.properties.delta_z),
+                weight: 5
+            };
+        }
+    }).addTo(legendMap);
+}
+
+function getElevationColor(elevation) {
+    return elevation > 200 ? "#800026" :
+           elevation > 100 ? "#BD0026" :
+           elevation > 50  ? "#E31A1C" :
+           elevation > 20  ? "#FC4E2A" :
+           elevation > 10  ? "#FD8D3C" :
+           elevation > 5   ? "#FEB24C" :
+                             "#FFEDA0";
+}
+
+
+
 document.getElementById('run-button').addEventListener('click', function (event) {
     event.preventDefault(); // Empêche le comportement par défaut
 
@@ -61,30 +86,20 @@ document.getElementById('run-button').addEventListener('click', function (event)
 
     console.log('Bouton RUN cliqué, envoi des coordonnées au backend...');
 
-    // Envoyer les coordonnées au backend
     fetch("/process-rectangle", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ coordinates: currentCoordinates }),
     })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
+        .then((response) => response.json())
         .then((data) => {
-            console.log("Réponse du backend :", data);
-
             if (data.geojson) {
-
                 currentGeoJSON = JSON.parse(data.geojson);
 
-                // légende catégorisée selon "info_regrouped"
                 const categories = [...new Set(currentGeoJSON.features.map(f => f.properties.info_regrouped))];
                 addLegend(categories);
-    
-                const geojsonLayer = L.geoJSON(currentGeoJSON, {
+                    
+                geojsonLayer = L.geoJSON(currentGeoJSON, {
                     style: feature => ({
                         color: getColor(feature.properties.info_regrouped),
                         weight: 3,
@@ -93,10 +108,17 @@ document.getElementById('run-button').addEventListener('click', function (event)
                 }).addTo(map);
                 
                 map.fitBounds(geojsonLayer.getBounds());
-                console.log('Les données sont affichées sur la carte.');
-                
+    
+                // Afficher les boutons une fois la carte chargée
+                document.getElementById("download-osm-data").style.display = "block";
+                document.getElementById("elevation-button").style.display = "block";
+    
                 plotHistogram(currentGeoJSON);
 
+                
+
+
+                
             } else {
                 console.error("Aucun GeoJSON retourné.");
                 alert("Aucune donnée disponible pour la zone sélectionnée.");
@@ -107,7 +129,17 @@ document.getElementById('run-button').addEventListener('click', function (event)
 
 
 
+document.addEventListener('DOMContentLoaded', function () {
+    const downloadButton = document.getElementById("download-osm-data");
+    const elevationButton = document.getElementById("elevation-button");
 
+    if (downloadButton) {
+        downloadButton.style.display = "none";  // Caché au départ
+    }
+    if (elevationButton) {
+        elevationButton.style.display = "none"; // Caché au départ
+    }
+});
 
 document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('download-osm-data').addEventListener('click', function () {
@@ -118,12 +150,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         console.log('Bouton DOWNLOAD cliqué, téléchargement des données en cours...');
 
-        // Envoyer une requête pour télécharger le CSV
         fetch("/download-csv", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ geojson: currentGeoJSON }), // Vous devez stocker currentGeoJSON
-        })
+            body: JSON.stringify({ geojson: currentGeoJSON }), 
+                })
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -145,6 +176,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(error => console.error("Erreur :", error));
     });
 });
+
 
 function addLegend(infoCategories) {
     var legend = L.control({ position: "bottomright" });
@@ -216,6 +248,47 @@ function getColor(category) {
     };
 }
 
+/// ELEVATION ......
+document.addEventListener('DOMContentLoaded', function () {
+
+    document.getElementById("elevation-button").addEventListener("click", function () {
+                
+        console.log('bouton élévation cliqué')
+
+        fetch("/get-elevation", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ geojson: currentGeoJSON }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.geojson) {
+                currentGeoJSON = JSON.parse(data.geojson);
+
+                if (geojsonLayer) {
+                        map.removeLayer(geojsonLayer);
+                    }
+                geojsonLayer = L.geoJSON(currentGeoJSON, {
+                    style: feature => ({
+                        color: getColor(feature.properties.delta_z),
+                        weight: 3,
+                        opacity: 1
+                    })
+                }).addTo(map);
+
+                alert("Élévation calculée et ajoutée !");
+                updateLegendMap(currentGeoJSON); // Mettre à jour la carte des dénivelés
+            } else {
+                alert("Erreur lors du calcul de l'élévation.");
+            }
+        })
+        
+    });
+});
+
+/// ...... ELEVATION
 
 // Histogramme
 
@@ -253,13 +326,9 @@ function plotHistogram(data) {
     Plotly.newPlot("chart", plotData, layout);
 }
 
-// Téléchargement de l'histogramme en JPEG
-document.getElementById('download-barplot').addEventListener('click', function () {
-    Plotly.toImage(document.getElementById('chart'), { format: 'jpeg', width: 800, height: 600 })
-        .then(function (imageData) {
-            var link = document.createElement('a');
-            link.href = imageData;
-            link.download = 'chart.jpeg';
-            link.click();
-        });
-});
+
+
+
+
+
+

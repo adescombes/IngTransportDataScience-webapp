@@ -1,13 +1,13 @@
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 
+import json
 import geopandas as gpd
 import osmnx as ox
 from osmnx._errors import InsufficientResponseError
-from pandasql import sqldf
-import pandas as pd
-import os
-from shapely.geometry import Polygon, box
+import requests
+from shapely.geometry import box
+from shapely.wkt import loads
 
 from scripts.geovelo_pandas_filters import geovelo_pandas_filters
 from scripts.helpers import *
@@ -32,18 +32,15 @@ def process_rectangle():
     coordinates = data.get("coordinates", [])
     app.logger.debug("Coordonnées reçues : %s", coordinates)
 
-    # Vérifier les coordonnées
     if not coordinates or len(coordinates) != 2:
         app.logger.error("Coordonnées invalides")
         return jsonify({"geojson": None, "message": "Invalid coordinates."})
 
-    # Créer un polygone à partir des coordonnées
     lon_min, lat_min = coordinates[0]
     lon_max, lat_max = coordinates[1]
     polygon = box(lon_min, lat_min, lon_max, lat_max)
     app.logger.debug("Polygone créé : %s", polygon)
 
-    # Extraire les données OSM
     try:
         osm_data = ox.features.features_from_polygon(polygon, tags_of_interest)
 
@@ -53,11 +50,38 @@ def process_rectangle():
         ].reset_index()  # only the line geometries
         line.crs = "EPSG:4326"
         line = line.to_crs(2056)
-        line["length"] = line.length
 
+        # REQUETES OSM
         filtered_line = geovelo_pandas_filters(line.copy())
 
-        total_length = line["length"].sum()
+        # EXPLODE MULTILINES -> GET ELEVATION
+        rows = []
+        for _, row in filtered_line.iterrows():
+
+            geom = row["geometry"]
+            print(geom)
+            print()
+            print(type(geom))
+            c = loads(str(geom)).coords
+
+            for i in range(len(c) - 1):
+
+                coords_start = c[i]
+                coords_end = c[i + 1]
+
+                new_row = row.copy()
+                new_row["geometry"] = "LINESTRING (%f %f, %f %f)" % (
+                    coords_start[0],
+                    coords_start[1],
+                    coords_end[0],
+                    coords_end[1],
+                )
+
+                rows.append(new_row)
+
+        filtered_line["length"] = filtered_line.length
+
+        total_length = filtered_line["length"].sum()
         filtered_line["length_prct"] = filtered_line["length"].apply(
             lambda x: 100 * x / total_length
         )
@@ -89,15 +113,89 @@ def download_csv():
     if not geojson_data:
         return jsonify({"message": "No GeoJSON data provided."}), 400
 
-    # Convertir le GeoJSON en GeoDataFrame
     gdf = gpd.GeoDataFrame.from_features(geojson_data["features"])
 
-    # Créer un fichier CSV temporaire
     csv_path = "osm_data.csv"
     gdf.to_csv(csv_path, index=False)
 
-    # Envoyer le fichier CSV
     return send_file(csv_path, as_attachment=True, download_name="osm_data.csv")
+
+
+def get_elevation_swisstopo(coords):
+    url = "https://api3.geo.admin.ch/rest/services/height"
+    params = {"easting": coords[0], "northing": coords[1], "sr": "2056"}
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        return response.json()["height"]
+    else:
+        raise Exception(
+            f"Erreur API Swisstopo : {response.status_code}, {response.text}"
+        )
+
+
+@app.route("/get-elevation", methods=["POST"])
+def get_elevation():
+
+    print("Requête reçue pour calculer l'élévation")  # Pour déboguer
+    try:
+        data = request.json
+        geojson_data = data["geojson"]
+
+        # Ajoutez ici le code de transformation et requête Swisstopo
+        filtered_line = gpd.GeoDataFrame.from_features(geojson_data["features"])
+
+        if filtered_line.empty or "geometry" not in filtered_line:
+            return jsonify({"message": "Invalid GeoJSON data."}), 400
+
+        filtered_line = filtered_line.set_crs(epsg=4326, allow_override=True).to_crs(
+            epsg=2056
+        )
+
+        filtered_line["delta_z"] = 0
+
+        for _, row in filtered_line.iterrows():
+            geom = row["geometry"]
+            coords = list(geom.coords)
+
+            if len(coords) < 2:
+                continue  # Ignore les segments invalides
+
+            elevation_start = get_elevation_swisstopo(coords[0])
+            elevation_end = get_elevation_swisstopo(coords[-1])
+            delta_z = float(elevation_end) - float(elevation_start)
+            print(delta_z)
+            filtered_line.at[_, "delta_z"] = delta_z
+
+        filtered_line["pente"] = filtered_line.apply(
+            lambda x: 100 * x["delta_z"] / x["length"] if x["length"] != 0 else 0,
+            axis=1,
+        )
+
+        filtered_line = filtered_line.to_crs(epsg=4326)
+
+        csv_path = "osm_data_elevation.csv"
+        filtered_line.to_csv(csv_path, index=False)
+
+        return jsonify(
+            {"geojson": json.dumps(geojson_data)}
+        )  # Assurez-vous que ce retour est bien un JSON valide
+    except Exception as e:
+        print(f"Erreur serveur : {e}")
+        return jsonify({"error": str(e)}), 500
+
+    """
+
+
+
+    
+
+    return send_file(
+        csv_path, as_attachment=True, download_name="osm_data_elevation.csv"
+    )
+
+
+#    return jsonify({"geojson": filtered_line.to_json()})
+    """
 
 
 if __name__ == "__main__":
