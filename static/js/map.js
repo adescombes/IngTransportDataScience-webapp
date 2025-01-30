@@ -36,6 +36,7 @@ var drawControl = new L.Control.Draw({
         featureGroup: drawnItems
     }
 });
+
 map.addControl(drawControl);
 
 // Stocker les coordonnées du polygone dessiné
@@ -57,14 +58,27 @@ map.on(L.Draw.Event.CREATED, function (event) {
     console.log('Coordonnées stockées :', currentCoordinates);
 });
 
+function showLoadingCursor() {
+    document.body.classList.add("loading"); 
+    document.querySelector(".leaflet-container").classList.add("loading");
+}
+
+function hideLoadingCursor() {
+    document.body.classList.remove("loading"); 
+    document.querySelector(".leaflet-container").classList.remove("loading"); 
+
+}
 
 document.getElementById('run-button').addEventListener('click', function (event) {
+
     event.preventDefault(); // Empêche le comportement par défaut
 
     if (!currentCoordinates) {
         alert("Veuillez dessiner un rectangle avant d'appuyer sur RUN.");
         return;
     }
+
+    showLoadingCursor();
 
     console.log('Bouton RUN cliqué, envoi des coordonnées au backend...');
 
@@ -96,7 +110,6 @@ document.getElementById('run-button').addEventListener('click', function (event)
                 // Afficher les boutons une fois la carte chargée
                 document.getElementById("download-osm-data").style.display = "block";
                 document.getElementById("elevation-button").style.display = "block";
-                document.getElementById("download-elevation").style.display = "block";
 
                 plotHistogram(currentGeoJSON);
                 
@@ -105,7 +118,8 @@ document.getElementById('run-button').addEventListener('click', function (event)
                 alert("Aucune donnée disponible pour la zone sélectionnée.");
             }
         })
-        .catch((error) => console.error("Erreur :", error));
+        .catch((error) => console.error("Erreur :", error))
+        .finally(() => hideLoadingCursor());
 });
 
 
@@ -127,6 +141,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
+
     document.getElementById('download-osm-data').addEventListener('click', function () {
         if (!currentGeoJSON) {
             alert("Veuillez d'abord dessiner une zone et charger les données.");
@@ -134,6 +149,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         console.log('Bouton DOWNLOAD cliqué, téléchargement des données en cours...');
+
 
         fetch("/download-csv", {
             method: "POST",
@@ -158,7 +174,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 window.URL.revokeObjectURL(url);
                 console.log("Fichier CSV téléchargé avec succès.");
             })
-            .catch(error => console.error("Erreur :", error));
+            .catch(error => console.error("Erreur :", error))
+            .finally(() => hideLoadingCursor());
     });
 });
 
@@ -240,47 +257,37 @@ document.addEventListener('DOMContentLoaded', function () {
                 
         console.log('bouton élévation cliqué')
 
+        showLoadingCursor();
+
         fetch("/get-elevation", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({ geojson: currentGeoJSON }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.geojson) {
-                currentGeoJSON = JSON.parse(data.geojson);
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.geojson) {
+                    currentGeoJSON = JSON.parse(data.geojson);
 
-                if (geojsonLayer) {
-                        map.removeLayer(geojsonLayer);
-                    }
-                var geojsonLayer = L.geoJSON(currentGeoJSON, {
-                    style: feature => ({
-                        color: getColor(feature.properties.pente),
-                        weight: 3,
-                        opacity: 1
-                    })
-                });
+                    elevationLayer = L.geoJSON(currentGeoJSON, {
+                        style: feature => ({
+                            color: getElevationColor(feature.properties.pente),
+                            weight: 3,
+                            opacity: 1
+                        })
+                    }).addTo(map);
 
+                    layerControl.addOverlay(elevationLayer, "Élévation");
+                    addElevationLegend();
+                    document.getElementById("download-elevation").style.display = "block";
 
-                elevationLayer = L.geoJSON(currentGeoJSON, {
-                    style: feature => ({
-                        color: getElevationColor(feature.properties.pente),
-                        weight: 3,
-                        opacity: 1
-                    })
-                }).addTo(map);
-
-                layerControl.addOverlay(elevationLayer, "Élévation");
-
-                addElevationLegend();
-
-            } else {
-                alert("Erreur lors du calcul de l'élévation.");
-            }
-        })
-        
+                } else {
+                    alert("Erreur lors du calcul de l'élévation.");
+                }
+            })
+            .finally(() => hideLoadingCursor()); 
     });
 });
 
@@ -328,26 +335,17 @@ function getElevationColor(pente) {
            pente > 7.5  ? "#E31A1C" :
            pente > 5  ? "#FC4E2A" :
            pente > 2.5   ? "#FD8D3C" :
-           pente > 0   ? "#FEB24C" :
+           pente > -1   ? "#FEB24C" :
            "#FFEDA0";  // Couleur pour valeurs négatives ou inconnues
 }
 
 
-// document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
 
     document.getElementById("download-elevation").addEventListener("click", function () {
-        if (!currentGeoJSON) {
-            alert("Veuillez d'abord calculer l'élévation avant de télécharger.");
-            return;
-        }
+        console.log("Téléchargement du fichier d'élévation...");
     
-        console.log("Données envoyées à /download-elevation-csv :", currentGeoJSON);
-    
-        fetch("/download-elevation-csv", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ geojson: currentGeoJSON }) 
-        })
+        fetch("/download-elevation-csv", { method: "GET" })
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -363,13 +361,11 @@ function getElevationColor(pente) {
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
-            console.log("Fichier CSV d'élévation téléchargé avec succès.");
+            console.log("Fichier CSV téléchargé avec succès.");
         })
-        .catch(error => console.error("Erreur :", error));
+        .catch(error => console.error("Erreur :", error))
     });
-    
-
-// });
+});
 
 
 
@@ -403,7 +399,13 @@ function plotHistogram(data) {
     const layout = {
         title: "% linéaire des infrastructures cyclables",
         xaxis: { title: "% linéaire" }, // Axe X montre les longueurs
-        yaxis: { title: "" } 
+        yaxis: { title: "", automargin: true },
+        margin: {
+            l: 150,  // Ajuste cette valeur (largeur en pixels pour l'axe Y)
+            r: 20,
+            t: 50,
+            b: 50
+        }
     };
 
     Plotly.newPlot("chart", plotData, layout);

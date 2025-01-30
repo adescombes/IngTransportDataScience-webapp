@@ -19,6 +19,8 @@ CORS(
     app, origins=["http://127.0.0.1:5500", "http://127.0.0.1:5000"]
 )  # Activer CORS pour toutes les routes
 
+filtered_line = None
+
 
 def has_list(x):
     return any(isinstance(i, list) for i in x)
@@ -132,6 +134,7 @@ def get_elevation_swisstopo(coords):
 
 @app.route("/get-elevation", methods=["POST"])
 def get_elevation():
+    global filtered_line
 
     print("Requête reçue pour calculer l'élévation")  # Pour déboguer
     try:
@@ -179,34 +182,18 @@ def get_elevation():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/download-elevation-csv", methods=["POST"])
+@app.route("/download-elevation-csv", methods=["GET"])
 def download_elevation_csv():
-    try:
-        data = request.get_json()
+    global filtered_line
 
-        if not data or "geojson" not in data:
-            return jsonify({"error": "Données manquantes"}), 400
+    if filtered_line is None or filtered_line.empty:
+        return jsonify({"error": "Aucune donnée d'élévation disponible"}), 400
 
-        geojson = data["geojson"]
-        gdf = gpd.GeoDataFrame.from_features(geojson["features"])
+    # Définition du chemin temporaire
+    csv_file = "osm_data_elevation.csv"
+    filtered_line.to_csv(csv_file, index=False)
 
-        # Vérifier que l'altitude est bien présente
-        if "pente" not in gdf.columns:
-            return jsonify({"error": "Aucune donnée d'altitude trouvée"}), 400
-
-        # Sauvegarder en CSV
-        csv_path = "osm_data_elevation.csv"
-        gdf.to_csv(csv_path, index=False)
-
-        return send_file(
-            csv_path,
-            as_attachment=True,
-            mimetype="text/csv",
-            download_name="osm_data_elevation.csv",
-        )
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    return send_file(csv_file, as_attachment=True, mimetype="text/csv")
 
 
 if __name__ == "__main__":

@@ -16,18 +16,28 @@ body {
 
 #chart-container {
     flex: 1;
-    max-height: 50%;
+    padding: 5vw;
 }
 
-.button {
+#controls {
+    height: 10vh;
+    display: flex;
+    flex-direction: row;
+    margin: 20px;
+}
+
+#run-button, #download-osm-data, #elevation-button, #download-elevation {
     text-align: center;
-    width: 100px;
+    width: calc((100% / 3) - 15px);
     font-size: 16px;
     cursor: pointer;
     background-color: #ccc;
     border: 1px solid #999;
-    margin: 5px;
+    margin: 20px;
+
 }
+
+
 
 /* Partie gauche : pleine hauteur */
 #left-pane {
@@ -52,4 +62,8 @@ body {
     height: 100%;
     flex: 1;
     max-height: 50%;
+}
+
+.loading, .loading .leaflet-container {
+    cursor: wait;
 }
