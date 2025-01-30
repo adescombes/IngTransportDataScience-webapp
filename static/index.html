@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Map and Chart</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.25.2/plotly.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <style></style>
+  </head>
+  <body>
+    <div id="left-pane">
+      <div id="map"></div>
+      <div id="controls">
+        <button id="run-button" type="button">RUN</button>
+        <script src="map.js"></script>
+        <button id="download-osm-data" style="display: none;">DOWNLOAD OSM</button>
+        <button id="elevation-button" style="display: none;">GET ELEVATION</button>
+        <button id="download-elevation" style="display: none;">DOWNLOAD ELEVATION</button>
+      </div>
+    </div>
+    <div id="right-pane">
+      </div>
+      <div id="chart-container">
+        <div id="chart"></div>
+      </div>
+    </div>
+    
+
+
+  </body>
+</html>
