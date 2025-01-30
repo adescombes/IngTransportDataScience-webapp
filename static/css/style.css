@@ -1,0 +1,69 @@
+/* pour cacher ces boutons au départ */
+#download-osm-data, #elevation-button, #download-elevation {
+    display: none;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    height: 100vh;
+}
+
+#map {
+    flex: 1;
+}
+
+#chart-container {
+    flex: 1;
+    padding: 5vw;
+}
+
+#controls {
+    height: 10vh;
+    display: flex;
+    flex-direction: row;
+    margin: 20px;
+}
+
+#run-button, #download-osm-data, #elevation-button, #download-elevation {
+    text-align: center;
+    width: calc((100% / 3) - 15px);
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #ccc;
+    border: 1px solid #999;
+    margin: 20px;
+
+}
+
+
+
+/* Partie gauche : pleine hauteur */
+#left-pane {
+    width: 50%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#right-pane {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#legend-map, #chart {
+    width: 100%;
+    height: 100%;
+    flex: 1;
+    max-height: 50%;
+}
+
+.loading, .loading .leaflet-container {
+    cursor: wait;
+}
