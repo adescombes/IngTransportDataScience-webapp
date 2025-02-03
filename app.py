@@ -175,7 +175,7 @@ def get_elevation():
             elevation_start = get_elevation_swisstopo(coords[0])
             elevation_end = get_elevation_swisstopo(coords[-1])
             delta_z = abs(round(elevation_end - elevation_start, 5))
-            filtered_line.at[_, "delta_z"] = delta_z
+            filtered_line.at[_, "delta_z"] = float(delta_z)
 
         filtered_line["pente"] = filtered_line.apply(
             lambda x: 100 * x["delta_z"] / x["length"] if x["length"] != 0 else 0,
