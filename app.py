@@ -149,7 +149,6 @@ def get_elevation_swisstopo(coords):
 def get_elevation():
     global filtered_line
 
-    print("Requête reçue pour calculer l'élévation")  # Pour déboguer
     try:
         data = request.json
         geojson_data = data["geojson"]
@@ -176,16 +175,12 @@ def get_elevation():
             elevation_start = get_elevation_swisstopo(coords[0])
             elevation_end = get_elevation_swisstopo(coords[-1])
             delta_z = elevation_end - elevation_start
-            print("delta_z")
-            print(delta_z)
-            print(type(delta_z))
             filtered_line.at[_, "delta_z"] = abs(delta_z)
 
         filtered_line["pente"] = filtered_line.apply(
             lambda x: 100 * x["delta_z"] / x["length"] if x["length"] != 0 else 0,
             axis=1,
         )
-        print(filtered_line["pente"])
         filtered_line = filtered_line.to_crs(epsg=4326)
         csv_path = "osm_data_elevation.csv"
         filtered_line.to_csv(csv_path, index=False)
