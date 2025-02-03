@@ -163,7 +163,7 @@ def get_elevation():
             epsg=2056
         )
 
-        filtered_line["delta_z"] = 0
+        filtered_line["delta_z"] = 0.0
 
         for _, row in filtered_line.iterrows():
             geom = row["geometry"]
