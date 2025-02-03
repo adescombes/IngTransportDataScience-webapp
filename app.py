@@ -136,7 +136,9 @@ def get_elevation_swisstopo(coords):
     params = {"easting": coords[0], "northing": coords[1], "sr": "2056"}
     response = requests.get(url, params=params)
     if response.status_code == 200:
-        return response.json()["height"]
+        height_str = response.json()["height"]
+        height = round(float(height_str), 5)
+        return height
     else:
         raise Exception(
             f"Erreur API Swisstopo : {response.status_code}, {response.text}"
@@ -173,14 +175,17 @@ def get_elevation():
 
             elevation_start = get_elevation_swisstopo(coords[0])
             elevation_end = get_elevation_swisstopo(coords[-1])
-            delta_z = float(elevation_end) - float(elevation_start)
+            delta_z = elevation_end - elevation_start
+            print("delta_z")
+            print(delta_z)
+            print(type(delta_z))
             filtered_line.at[_, "delta_z"] = abs(delta_z)
 
         filtered_line["pente"] = filtered_line.apply(
             lambda x: 100 * x["delta_z"] / x["length"] if x["length"] != 0 else 0,
             axis=1,
         )
-
+        print(filtered_line["pente"])
         filtered_line = filtered_line.to_crs(epsg=4326)
         csv_path = "osm_data_elevation.csv"
         filtered_line.to_csv(csv_path, index=False)
